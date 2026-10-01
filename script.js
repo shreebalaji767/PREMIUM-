@@ -111,9 +111,9 @@
     const paid = isPaidPlan(sessionPlan);
     const headerUpgrade = $("#headerUpgrade");
     if (headerUpgrade) {
-      headerUpgrade.textContent = paid ? "Premium Active" : "Get Premium";
+      headerUpgrade.textContent = paid ? (sessionPlan + " Active") : "Get Premium";
       headerUpgrade.classList.toggle("is-active", paid);
-      headerUpgrade.setAttribute("aria-label", paid ? "Premium is active" : "Get Premium");
+      headerUpgrade.setAttribute("aria-label", paid ? (sessionPlan + " is active") : "Get Premium");
     }
 
     $$("[data-plan-status]").forEach(el => {
