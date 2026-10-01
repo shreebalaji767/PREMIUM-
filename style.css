@@ -445,3 +445,84 @@ body[data-theme="dark"] .light-btn{background:#eef1f5;color:#111318;border-color
   .nav nav a::after{transition:none}
   .plan,.usage-card,.account-card,.ops-card,.control-card,.intel-card,.features article{transition:none}
 }
+
+
+/* V29 — responsive PWA install control */
+.support-tools{
+  position:fixed;
+  right:22px;
+  bottom:22px;
+  z-index:1000;
+  display:flex;
+  align-items:center;
+  gap:9px;
+}
+.support-tools .support-toggle{
+  position:static;
+  flex:none;
+}
+.pwa-fab{
+  min-height:44px;
+  border:1px solid var(--line,#e4e7ec);
+  border-radius:999px;
+  padding:0 15px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  background:var(--surface,#fff);
+  color:var(--text,#111318);
+  box-shadow:0 10px 28px rgba(16,18,23,.12);
+  font:700 12px/1 inherit;
+  cursor:pointer;
+  transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease,background .2s ease;
+}
+.pwa-fab:hover{
+  transform:translateY(-2px);
+  border-color:rgba(108,103,201,.42);
+  box-shadow:0 14px 32px rgba(16,18,23,.16);
+}
+.pwa-fab.ready{
+  border-color:rgba(215,180,90,.55);
+  box-shadow:0 10px 28px rgba(215,180,90,.13);
+}
+.pwa-fab[hidden]{display:none!important}
+body[data-theme="dark"] .pwa-fab{
+  background:#1b2028;
+  color:#f5f6f8;
+  border-color:#343b46;
+  box-shadow:0 12px 30px rgba(0,0,0,.28);
+}
+body[data-theme="dark"] .pwa-fab:hover{
+  background:#252b34;
+  border-color:rgba(215,180,90,.58);
+}
+@media(max-width:700px){
+  .support-tools{
+    right:14px;
+    bottom:14px;
+    gap:7px;
+  }
+  .pwa-fab{
+    width:44px;
+    height:44px;
+    min-height:44px;
+    padding:0;
+    border-radius:50%;
+    font-size:17px;
+  }
+  .pwa-fab span{display:none}
+}
+@media(max-width:420px){
+  .support-tools{right:10px;bottom:10px}
+  .pwa-fab,.support-tools .support-toggle{
+    width:42px;
+    height:42px;
+  }
+}
+@media(orientation:landscape) and (max-height:520px){
+  .support-tools{bottom:10px;right:12px}
+}
+@media(prefers-reduced-motion:reduce){
+  .pwa-fab{transition:none}
+}
