@@ -506,13 +506,30 @@
     $("#prefDone").onclick = closeModal;
   }
 
+  function applyTheme(theme, announce = false) {
+    const next = theme === "dark" ? "dark" : "light";
+    document.body.dataset.theme = next;
+    document.documentElement.style.colorScheme = next;
+    const button = document.getElementById("headerTheme");
+    if (button) {
+      const dark = next === "dark";
+      button.setAttribute("aria-pressed", String(dark));
+      button.setAttribute("aria-label", dark ? "Switch to light mode" : "Switch to dark mode");
+      button.setAttribute("title", dark ? "Switch to light mode" : "Switch to dark mode");
+      const icon = button.querySelector(".theme-icon");
+      if (icon) icon.textContent = dark ? "☀" : "◐";
+    }
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute("content", next === "dark" ? "#0b0d11" : "#ffffff");
+  }
+
   function toggleTheme() {
     const next = document.body.dataset.theme === "dark" ? "light" : "dark";
-    document.body.dataset.theme = next;
+    applyTheme(next);
     state = readState();
     state.theme = next;
     writeState(state);
-    toast(next === "dark" ? "Dark appearance enabled." : "Light appearance enabled.");
+    toast(next === "dark" ? "Dark mode enabled." : "Light mode enabled.");
   }
 
   function install() {
@@ -861,7 +878,7 @@ function bindActions() {
   }
 
   const savedTheme = readState().theme;
-  document.body.dataset.theme = savedTheme === "dark" ? "dark" : "light";
+  applyTheme(savedTheme === "dark" ? "dark" : "light");
   document.documentElement.classList.toggle("reduced-motion", localStorage.getItem(REDUCED) === "1");
 
   renderState();
