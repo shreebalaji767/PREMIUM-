@@ -724,6 +724,26 @@
 
   bindActions();
 
+  // Wire legacy/header controls that predate data-action attributes.
+  const legacyActions = {
+    headerSearch: "search",
+    headerNotifications: "notifications",
+    headerLogin: "login",
+    headerTheme: "theme",
+    headerUpgrade: "upgrade",
+    mobileMenu: "mobileMenu"
+  };
+  Object.entries(legacyActions).forEach(([id, action]) => {
+    const element = document.getElementById(id);
+    if (!element || element.dataset.boundPremium === "1") return;
+    element.dataset.boundPremium = "1";
+    element.addEventListener("click", event => {
+      event.preventDefault();
+      event.stopPropagation();
+      route(action);
+    });
+  });
+
   document.addEventListener("click", event => {
     const element = event.target instanceof Element ? event.target : null;
     const target = element?.closest("[data-action]");
@@ -791,6 +811,11 @@
   window.addEventListener("offline", () => $("#offlineBar")?.classList.add("show"));
 
   if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      if (window.__premiumReloading) return;
+      window.__premiumReloading = true;
+      window.location.reload();
+    });
     window.addEventListener("load", () => {
       navigator.serviceWorker.register("sw.js").catch(() => {});
     });
