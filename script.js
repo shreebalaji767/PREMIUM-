@@ -721,7 +721,7 @@ function premiumActionFeedback(kind) {
   const s = states[kind];
   if (!s) return;
   const title = s[0], step = s[1], done = s[2];
-  showModal(title, `
+  openModal(title, `
     <div class="receipt">
       <b>${title}</b><br>
       STATUS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PROCESSING<br>
@@ -733,7 +733,7 @@ function premiumActionFeedback(kind) {
   `, [{
     label: "Continue",
     action: () => {
-      showModal(title, `
+      openModal(title, `
         <div class="receipt">
           <b>✓ ${done}</b><br>
           REQUEST ID&nbsp;PRM-${Date.now().toString().slice(-8)}<br>
