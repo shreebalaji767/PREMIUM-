@@ -38,6 +38,14 @@
 
   let state = readState();
 
+  // V36 migration: older builds could persist premium=true without the
+  // corresponding plan field. Promote that legacy state to Premium so the
+  // Command Center remains Premium after a refresh.
+  if (state.premium === true && !isPaidPlan(state.plan)) {
+    state.plan = "Premium";
+    writeState(state);
+  }
+
   function isPaidPlan(plan) {
     return plan === "Premium" || plan === "Ultra Max Pro+";
   }
