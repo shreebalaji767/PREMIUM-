@@ -32,8 +32,13 @@
     }
   }
 
-  function writeState(state) {
-    localStorage.setItem(STORE, JSON.stringify(state));
+  function writeState(nextState) {
+    try {
+      localStorage.setItem(STORE, JSON.stringify(nextState));
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   let state = readState();
@@ -939,7 +944,7 @@ function bindActions() {
       window.location.reload();
     });
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("sw.js").catch(() => {});
+      navigator.serviceWorker.register("./sw.js?v=42", { updateViaCache: "none" }).catch(() => {});
     });
   }
 
