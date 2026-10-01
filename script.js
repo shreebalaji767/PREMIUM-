@@ -198,7 +198,19 @@
     const backdrop = $("#modalBackdrop");
     const content = $("#modalContent");
     if (!backdrop || !content) return;
-    content.innerHTML = "<h2>" + title + "</h2><p>" + body + "</p>" + actions;
+    const renderedActions = Array.isArray(actions)
+      ? '<div class="modal-actions">' + actions.map(item =>
+          '<button class="' + (item?.primary === false ? "secondary" : "primary") + '" data-modal-action="' +
+          escapeHtml(item?.label || "Continue") + '">' + escapeHtml(item?.label || "Continue") + "</button>"
+        ).join("") + "</div>"
+      : actions;
+    content.innerHTML = "<h2>" + title + "</h2><p>" + body + "</p>" + renderedActions;
+    if (Array.isArray(actions)) {
+      actions.forEach((item, index) => {
+        const button = content.querySelectorAll("[data-modal-action]")[index];
+        if (button && typeof item?.action === "function") button.addEventListener("click", item.action);
+      });
+    }
     backdrop.classList.add("open");
     backdrop.setAttribute("aria-hidden", "false");
   }
