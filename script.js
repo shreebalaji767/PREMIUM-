@@ -107,3 +107,53 @@ const originalUpgrade=window.upgrade;if(typeof originalUpgrade==="function"){win
   });
   renderCommands();
 })();
+
+
+/* V11 — workspace controls, export, keyboard help and live telemetry */
+(function(){
+  const K="premium-workspace-v1";
+  const get=()=>{try{return JSON.parse(localStorage.getItem(K)||"{}")}catch{return {}}};
+  const put=s=>localStorage.setItem(K,JSON.stringify(s));
+  const record=a=>{const s=get();s.events=s.events||[];s.events.unshift({t:new Date().toLocaleTimeString(),a});s.events=s.events.slice(0,120);put(s)};
+  const esc=s=>String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+  function shortcuts(){
+    openModal("Keyboard shortcuts",'<div class="v11-shortcuts"><span>Command palette</span><kbd>Ctrl K</kbd><span>Search</span><kbd>/</kbd><span>Close dialogs</span><kbd>Esc</kbd><span>Navigate page</span><kbd>↑ ↓</kbd></div><div class="chaos">Keyboard efficiency has been added to your account.</div>',"<div class='modal-actions'><button class='primary' id='v11Done'>Done</button></div>");
+    $("#v11Done").onclick=closeModal;
+  }
+  function exportWorkspace(){
+    const s=get();
+    const payload={exportedAt:new Date().toISOString(),product:"Premium",workspace:{...s}};
+    const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
+    const url=URL.createObjectURL(blob),a=document.createElement("a");
+    a.href=url;a.download="premium-workspace-export.json";a.click();setTimeout(()=>URL.revokeObjectURL(url),500);
+    record("Exported workspace data");toast("Workspace export prepared.");
+  }
+  function resetWorkspace(){
+    openModal("Reset workspace","This clears the locally stored workspace state in this browser.<div class='chaos'>Your browser will immediately become less interesting.</div>","<div class='modal-actions'><button class='secondary v11-danger' id='v11Cancel'>Cancel</button><button class='primary' id='v11Reset'>Reset workspace</button></div>");
+    $("#v11Cancel").onclick=closeModal;
+    $("#v11Reset").onclick=()=>{localStorage.removeItem(K);closeModal();location.reload()};
+  }
+  function telemetry(){
+    const n=Math.floor(18+Math.random()*44);
+    $("#v11Latency").textContent=n+" ms";
+    $("#v11Clock").textContent=new Date().toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"});
+  }
+  setInterval(telemetry,1000);telemetry();
+
+  const originalAction=window.action;
+  if(typeof originalAction==="function"){
+    window.action=function(type){
+      if(type==="shortcuts"){shortcuts();return}
+      if(type==="export"){exportWorkspace();return}
+      if(type==="reset"){resetWorkspace();return}
+      return originalAction(type);
+    };
+  }
+
+  document.addEventListener("keydown",e=>{
+    if((e.ctrlKey||e.metaKey)&&e.shiftKey&&e.key.toLowerCase()==="e"){e.preventDefault();exportWorkspace()}
+    if((e.ctrlKey||e.metaKey)&&e.shiftKey&&e.key.toLowerCase()==="h"){e.preventDefault();shortcuts()}
+  });
+
+  window.PremiumV11={exportWorkspace,resetWorkspace,shortcuts};
+})();
