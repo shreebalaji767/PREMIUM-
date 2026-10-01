@@ -581,28 +581,39 @@
     toast(next === "dark" ? "Dark mode enabled." : "Light mode enabled.");
   }
 
-  async function install() {
+  function install() {
     const prompt = window.__deferredPrompt;
     if (prompt && !window.__installPromptInFlight) {
       window.__installPromptInFlight = true;
+
+      // Call prompt() synchronously from the actual click path. Chromium
+      // requires the stored beforeinstallprompt event to be prompted once
+      // from a user action; awaiting before this call can lose activation.
+      let resultPromise;
       try {
-        const result = await prompt.prompt();
-        const outcome = result?.outcome || "dismissed";
+        resultPromise = prompt.prompt();
+      } catch {
         window.__deferredPrompt = null;
+        window.__installPromptInFlight = false;
         updatePwaInstallButton();
+        toast("Install prompt is no longer available.");
+        return;
+      }
+
+      Promise.resolve(resultPromise).then(result => {
+        const outcome = result?.outcome || "dismissed";
         if (outcome === "accepted") {
-          record("Installed Premium");
-          toast("Premium is installed.");
+          toast("Premium is being installed.");
         } else {
           toast("Install prompt dismissed.");
         }
-      } catch {
-        window.__deferredPrompt = null;
-        updatePwaInstallButton();
+      }).catch(() => {
         toast("Install prompt is no longer available.");
-      } finally {
+      }).finally(() => {
+        window.__deferredPrompt = null;
         window.__installPromptInFlight = false;
-      }
+        updatePwaInstallButton();
+      });
       return;
     }
 
@@ -927,17 +938,20 @@ function bindActions() {
       button.hidden = true;
       return;
     }
-    button.hidden = false;
     if (window.__deferredPrompt) {
+      button.hidden = false;
       button.classList.add("ready");
       button.title = "Install Premium app";
       button.setAttribute("aria-label", "Install Premium app");
       button.querySelector("span")?.replaceChildren(document.createTextNode("Install app"));
     } else {
+      // The native prompt is unavailable in this browser/session. Keep the
+      // fallback reachable through the footer/command palette, but don't show
+      // a misleading floating install button.
+      button.hidden = true;
       button.classList.remove("ready");
-      button.title = "Premium app install available from your browser menu";
-      button.setAttribute("aria-label", "Premium app install available from your browser menu");
-      button.querySelector("span")?.replaceChildren(document.createTextNode("Add app"));
+      button.title = "Install Premium app";
+      button.setAttribute("aria-label", "Install Premium app");
     }
   }
 
