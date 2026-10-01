@@ -99,7 +99,7 @@
       headerUpgrade.setAttribute("aria-label", paid ? "Premium is active" : "Get Premium");
     }
 
-    $("[data-plan-status]").forEach(el => {
+    $$("[data-plan-status]").forEach(el => {
       const plan = el.dataset.plan || "";
       const current = plan === state.plan;
       el.textContent = current ? "Current" : (plan === "Free" ? "Free" : plan);
