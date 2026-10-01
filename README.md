@@ -7,7 +7,7 @@ The interface stays professional. The workspace state has considerably more pers
 
 ## Current release
 
-**V11 — Workspace operations layer**
+**V12 — Workspace control layer**
 
 - Installable Progressive Web App
 - Offline application shell with service-worker caching
@@ -17,7 +17,7 @@ The interface stays professional. The workspace state has considerably more pers
 - Reduced-motion preference
 - Persistent workspace state through localStorage
 - Account, billing, operations, security, support, and workspace intelligence surfaces
-- Workspace export and local reset controls<br>- Live workspace telemetry and keyboard workflow helpers<br>- Browser-only architecture with no backend, database, or payment processor
+- Workspace export and local reset controls<br>- Live workspace telemetry, keyboard workflow helpers, notification state, and update detection<br>- Browser-only architecture with no backend, database, or payment processor
 
 ## Architecture
 
@@ -78,17 +78,19 @@ PREMIUM-/
 
 Enable **Settings → Pages → Deploy from branch → main → / (root)**.
 
-## V11 additions
+## V12 additions
 
-- Command palette with keyboard shortcut `Ctrl/Cmd + K`
+- Command palette with keyboard shortcut `Ctrl/Cmd + K` and centralized command routing
 - Quick actions for billing, activity, security, account, preferences, appearance, installation, and upgrade
+- Notification unread state with automatic clearing
+- Service-worker update detection with in-app refresh control
 - Persistent appearance and accessibility preferences
 - Faster navigation without leaving the current workspace
 
 ## Status
 
 **Production status:** Operational  
-**Release:** V10  
+**Release:** V12  
 **Backend:** None  
 **Database:** None  
 **Payment processor:** None  
