@@ -47,3 +47,41 @@ const originalUpgrade=window.upgrade;if(typeof originalUpgrade==="function"){win
 (function(){const K="premium-workspace-v1";function gs(){try{return JSON.parse(localStorage.getItem(K)||"{}")}catch{return {}}}function ps(s){localStorage.setItem(K,JSON.stringify(s))}function op(type){const s=gs();s.events=s.events||[];let msg="";if(type==="access"){msg=s.premium?"Access verified.":"Access verified.";openModal("Access review",msg+"<br><br><b>Session:</b> Active<br><b>Policy:</b> Standard workspace controls");addActivity("Reviewed access");}else if(type==="risk"){const n=(s.visits||1)%5===0;msg=n?"Assessment complete. One item requires follow-up.":"Assessment complete. No immediate action required.";openModal("Risk assessment",msg);addActivity("Ran risk assessment");}else{msg="Workspace records have been reconciled.";if((s.events||[]).length>18){msg="Workspace records have been reconciled. One historical record was retained for audit purposes."}openModal("Reconciliation",msg);addActivity("Reconciled workspace records")}ps(s)}$$("[data-action]").forEach(b=>{if(["access","risk","reconcile"].includes(b.dataset.action))b.addEventListener("click",()=>op(b.dataset.action))})})();
 (function(){const K="premium-workspace-v1";function get(){try{return JSON.parse(localStorage.getItem(K)||"{}")}catch{return {}}}function put(s){localStorage.setItem(K,JSON.stringify(s))}function record(label){const s=get();s.events=s.events||[];s.events.push({t:new Date().toLocaleTimeString(),a:label});if(s.events.length>120)s.events=s.events.slice(-120);put(s)}function team(){const s=get();const base=s.teamSize||1;const seats=Math.max(base,1);openModal("Team","<b>"+seats+" active seat"+(seats===1?"":"s")+"</b><br><br>Access is managed at the workspace level.<br><br><small>Seat allocation is synchronized automatically.</small>","<div class=\"modal-actions\"><button class=\"primary\" id=\"teamAction\">Review allocation</button></div>");document.getElementById("teamAction").onclick=()=>{closeModal();record("Reviewed seat allocation");toast("Seat allocation synchronized.");}}function docs(){const s=get();const n=24+Math.min(41,(s.events||[]).length);openModal("Records",n+" workspace records are currently indexed.<br><br><b>Index:</b> Current<br><b>Retention:</b> Standard<br><b>Integrity:</b> Verified");record("Viewed workspace records")}const s=get();const events=s.events||[];const score=document.getElementById("workspaceScore");const bar=document.getElementById("scoreBar");const note=document.getElementById("scoreNote");const value=Math.max(91,Math.min(99,98-(events.length%7)));if(score)score.textContent=value;if(bar)bar.style.width=value+"%";if(note)note.textContent=events.length>25?"Operating normally with historical activity retained":"Operating within expected parameters";const users=document.getElementById("activeUsers");const seats=document.getElementById("seatCount");const count=s.teamSize||1;if(users)users.textContent=count;if(seats)seats.textContent=Math.max(count,1);const docsEl=document.getElementById("documentCount");if(docsEl)docsEl.textContent=24+Math.min(41,events.length);$$("[data-action]").forEach(b=>{if(b.dataset.action==="team")b.addEventListener("click",team);if(b.dataset.action==="documents")b.addEventListener("click",docs)})})();
 (function(){if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}})();
+(function(){
+  const KEY="premium-workspace-v1";
+  const getState=()=>{try{return JSON.parse(localStorage.getItem(KEY)||"{}")}catch{return {}}};
+  const saveState=s=>localStorage.setItem(KEY,JSON.stringify(s));
+  function theme(){
+    const s=getState();s.theme=s.theme==="dark"?"light":"dark";saveState(s);
+    document.body.dataset.theme=s.theme;
+    toast("Appearance updated.");
+  }
+  function preferences(){
+    const s=getState();
+    openModal("Preferences","Choose how Premium behaves in this browser.",
+      '<div class="pref-row"><span>Appearance</span><button class="secondary" id="prefTheme">'+(s.theme==="dark"?"Use light mode":"Use dark mode")+'</button></div>'+
+      '<div class="pref-row"><span>Reduced motion</span><button class="secondary" id="prefMotion">'+(localStorage.getItem("premium-reduced-motion")==="1"?"Disable":"Enable")+'</button></div>'+
+      '<div class="modal-actions"><button class="primary" id="prefDone">Done</button></div>');
+    $("#prefTheme").onclick=()=>{theme();preferences()};
+    $("#prefMotion").onclick=()=>{const on=localStorage.getItem("premium-reduced-motion")==="1";localStorage.setItem("premium-reduced-motion",on?"0":"1");document.documentElement.classList.toggle("reduced-motion",!on);preferences()};
+    $("#prefDone").onclick=closeModal;
+  }
+  function install(){
+    if(window.__deferredPrompt){window.__deferredPrompt.prompt();window.__deferredPrompt.userChoice.finally(()=>window.__deferredPrompt=null)}
+    else toast("Install options are available from your browser menu.");
+  }
+  document.addEventListener("click",e=>{
+    const b=e.target.closest("[data-action]"); if(!b)return;
+    const a=b.dataset.action;
+    if(a==="theme")theme();
+    if(a==="preferences")preferences();
+    if(a==="install")install();
+  });
+  const s=getState();if(s.theme)document.body.dataset.theme=s.theme;
+  if(localStorage.getItem("premium-reduced-motion")==="1")document.documentElement.classList.add("reduced-motion");
+  window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();window.__deferredPrompt=e});
+  window.addEventListener("online",()=>$("#offlineBar")?.classList.remove("show"));
+  window.addEventListener("offline",()=>$("#offlineBar")?.classList.add("show"));
+  if(!navigator.onLine)$("#offlineBar")?.classList.add("show");
+  if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
+})();
