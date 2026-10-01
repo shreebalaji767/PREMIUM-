@@ -89,7 +89,7 @@
     const notifyDot = $("#notifyDot");
 
     if (accountValue) accountValue.textContent = "₹" + Number(state.accountValue || 0).toLocaleString("en-IN");
-    if (premiumStatus) premiumStatus.textContent = state.premium ? "Premium Active" : "Free Plan";
+    if (premiumStatus) premiumStatus.textContent = state.premium ? "Premium" : "Free";
     if (billingState) billingState.textContent = "Current plan: " + state.plan;
     if (balanceValue) balanceValue.textContent = "₹" + Number(state.accountValue || 0).toLocaleString("en-IN");
     if (eventCount) eventCount.textContent = state.events.length + " events";
