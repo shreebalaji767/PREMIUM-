@@ -912,7 +912,7 @@ function bindActions() {
   });
 
   function updatePwaInstallButton() {
-    const button = $(" #pwaInstallButton".trim());
+    const button = $("#pwaInstallButton");
     if (!button) return;
     const standalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
     if (standalone) {
