@@ -26,6 +26,7 @@
   // Plan state is session-only. A fresh page load always starts on Free.
   let sessionPlan = "Free";
   let selectedPlan = "Free";
+  let sessionPurchaseValue = 0;
 
   function normalizePlan(plan) {
     return plan === "Premium" || plan === "Ultra Max Pro+" || plan === "Free" ? plan : "Free";
@@ -73,6 +74,9 @@
   selectedPlan = "Free";
   state.plan = "Free";
   state.premium = false;
+  // Purchase value belongs to the current page session only.
+  sessionPurchaseValue = 0;
+  state.accountValue = 0;
   state.visits = Number(state.visits || 0) + 1;
   writeState(state);
 
@@ -150,10 +154,10 @@
     const identity = $("#accountIdentity");
     const notifyDot = $("#notifyDot");
 
-    if (accountValue) accountValue.textContent = "₹" + Number(state.accountValue || 0).toLocaleString("en-IN");
+    if (accountValue) accountValue.textContent = "₹" + Number(sessionPurchaseValue || 0).toLocaleString("en-IN");
     if (premiumStatus) premiumStatus.textContent = displayPlan(sessionPlan);
     if (billingState) billingState.textContent = "Current plan: " + sessionPlan;
-    if (balanceValue) balanceValue.textContent = "₹" + Number(state.accountValue || 0).toLocaleString("en-IN");
+    if (balanceValue) balanceValue.textContent = "₹" + Number(sessionPurchaseValue || 0).toLocaleString("en-IN");
     if (eventCount) eventCount.textContent = state.events.length + " events";
     if (invoiceCount) invoiceCount.textContent = Math.max(1, Math.min(12, Math.ceil(state.events.length / 3)));
     if (identity) {
@@ -298,7 +302,7 @@
         // Account value is a demo metric. Count only a new paid-plan activation,
         // never repeated clicks on an already-active plan.
         if (isPaidPlan(sessionPlan) && previousPlan !== sessionPlan) {
-          state.accountValue = Number(state.accountValue || 0) + priceFor(sessionPlan);
+          sessionPurchaseValue += priceFor(sessionPlan);
         }
 
         writeState(state);
@@ -705,7 +709,7 @@
     const payload = {
       exportedAt: new Date().toISOString(),
       plan: sessionPlan,
-      accountValue: state.accountValue,
+      accountValue: sessionPurchaseValue,
       events: state.events
     };
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
@@ -731,6 +735,7 @@
       localStorage.removeItem(SESSION);
       sessionPlan = "Free";
       selectedPlan = "Free";
+      sessionPurchaseValue = 0;
       state = { ...defaults, plan: "Free", premium: false };
       writeState(state);
       renderState();
