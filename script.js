@@ -85,3 +85,25 @@ const originalUpgrade=window.upgrade;if(typeof originalUpgrade==="function"){win
   if(!navigator.onLine)$("#offlineBar")?.classList.add("show");
   if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
 })();
+
+(function(){
+  const palette=$("#commandPalette"), input=$("#commandInput"), list=$("#commandList");
+  const commands=[
+    ["Open billing","billing"],["View activity","history"],["Review security","audit"],["Review account","account"],
+    ["Open preferences","preferences"],["Toggle appearance","theme"],["Install app","install"],["Start Premium","upgrade"]
+  ];
+  function renderCommands(q=""){const f=commands.filter(x=>x[0].toLowerCase().includes(q.toLowerCase()));list.innerHTML=f.map((x,i)=>'<button class="command-item" data-cmd="'+x[1]+'">'+x[0]+'<span>↵</span></button>').join("")||'<div class="command-item">No matching commands.</div>'}
+  function openPalette(){renderCommands();palette.classList.add("open");palette.setAttribute("aria-hidden","false");setTimeout(()=>input?.focus(),20)}
+  function closePalette(){palette.classList.remove("open");palette.setAttribute("aria-hidden","true")}
+  document.addEventListener("click",e=>{
+    if(e.target.closest("[data-action='palette']")){openPalette();return}
+    const cmd=e.target.closest("[data-cmd]")?.dataset.cmd;if(cmd){closePalette();handleAction(cmd)}
+    if(e.target===palette)closePalette();
+  });
+  input?.addEventListener("input",()=>renderCommands(input.value));
+  document.addEventListener("keydown",e=>{
+    if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"){e.preventDefault();openPalette()}
+    if(e.key==="Escape")closePalette();
+  });
+  renderCommands();
+})();
