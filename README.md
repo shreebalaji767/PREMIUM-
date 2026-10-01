@@ -7,7 +7,7 @@ The interface stays professional. The workspace state has considerably more pers
 
 ## Current release
 
-**V9 — Responsive PWA workspace**
+**V10 — Workspace command system**
 
 - Installable Progressive Web App
 - Offline application shell with service-worker caching
@@ -78,10 +78,17 @@ PREMIUM-/
 
 Enable **Settings → Pages → Deploy from branch → main → / (root)**.
 
+## V10 additions
+
+- Command palette with keyboard shortcut `Ctrl/Cmd + K`
+- Quick actions for billing, activity, security, account, preferences, appearance, installation, and upgrade
+- Persistent appearance and accessibility preferences
+- Faster navigation without leaving the current workspace
+
 ## Status
 
 **Production status:** Operational  
-**Release:** V9  
+**Release:** V10  
 **Backend:** None  
 **Database:** None  
 **Payment processor:** None  
