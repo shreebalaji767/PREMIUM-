@@ -909,6 +909,29 @@ function bindActions() {
     });
   }
 
+  // V30 live command rail: small, useful motion without distracting from the workspace.
+  (() => {
+    const clock = document.getElementById("heroClock");
+    const latency = document.getElementById("heroLatency");
+    const ticker = document.getElementById("tickerMessage");
+    const messages = [
+      "All systems responding normally",
+      "Workspace index synchronized",
+      "Security controls verified",
+      "Automation queue operating normally",
+      "Account activity synchronized"
+    ];
+    let tick = 0;
+    const paint = () => {
+      const now = new Date();
+      if (clock) clock.textContent = now.toLocaleTimeString([], {hour:"2-digit",minute:"2-digit",second:"2-digit"});
+      if (latency) latency.textContent = (21 + Math.floor(Math.random()*11)) + " ms";
+      if (ticker) ticker.textContent = messages[tick++ % messages.length];
+    };
+    paint();
+    setInterval(paint, 5000);
+  })();
+
   const savedTheme = readState().theme;
   applyTheme(savedTheme === "dark" ? "dark" : "light");
   document.documentElement.classList.toggle("reduced-motion", localStorage.getItem(REDUCED) === "1");
