@@ -933,7 +933,8 @@ function bindActions() {
   }
 
   window.addEventListener("beforeinstallprompt", event => {
-    event.preventDefault();
+    // Let the browser handle its native install banner. We no longer suppress
+    // the event, which removes the "Banner not shown" console warning.
     window.__deferredPrompt = event;
     updatePwaInstallButton();
   });
