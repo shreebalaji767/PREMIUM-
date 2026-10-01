@@ -193,3 +193,18 @@ const originalUpgrade=window.upgrade;if(typeof originalUpgrade==="function"){win
     navigator.serviceWorker.addEventListener("controllerchange",()=>{if(waitingWorker)location.reload()});
   }
 })();
+
+/* V12 header controls — direct wiring, independent of section action handlers */
+(function(){
+  const bind=(id,fn)=>{const el=document.getElementById(id);if(el)el.addEventListener("click",fn)};
+  bind("headerSearch",()=>showSearch());
+  bind("headerNotifications",()=>{showNotifications();document.getElementById("notifyDot")?.style.setProperty("display","none")});
+  bind("headerLogin",()=>action("login"));
+  bind("headerUpgrade",()=>action("upgrade"));
+  bind("headerTheme",()=>{
+    const current=document.body.dataset.theme||"light";
+    document.body.dataset.theme=current==="dark"?"light":"dark";
+    try{const x=JSON.parse(localStorage.getItem("premium-workspace-v1")||"{}");x.theme=document.body.dataset.theme;localStorage.setItem("premium-workspace-v1",JSON.stringify(x))}catch{}
+    toast("Appearance updated.");
+  });
+})();
