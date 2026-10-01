@@ -998,7 +998,7 @@ function bindActions() {
       window.location.reload();
     });
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./sw.js?v=45", { updateViaCache: "none" }).catch(() => {});
+      navigator.serviceWorker.register("./sw.js?v=46", { updateViaCache: "none" }).catch(() => {});
     });
   }
 
