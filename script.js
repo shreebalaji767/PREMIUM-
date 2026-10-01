@@ -300,3 +300,77 @@ const originalUpgrade=window.upgrade;if(typeof originalUpgrade==="function"){win
   document.addEventListener("click",e=>{const b=e.target.closest("[data-action]");if(!b)return;e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();try{route(b.dataset.action)}catch(err){console.error(err);toast("This action could not be completed.")}},true);
   ["headerSearch","headerNotifications","headerLogin","headerTheme","headerUpgrade","mobileMenu"].forEach(id=>document.getElementById(id)?.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();try{if(id==="headerSearch")search();else if(id==="headerNotifications")route("notifications");else if(id==="headerLogin")localLogin();else if(id==="headerTheme")theme();else if(id==="headerUpgrade")upgrade();else{const n=document.getElementById("mainNav"),open=n?.classList.toggle("open");e.currentTarget.setAttribute("aria-expanded",String(!!open))}}catch(err){console.error(err);toast("This action could not be completed.")}},true));
 })();
+
+
+/* V17 — persistent local product state and complete control layer */
+(function(){
+  const STORE="premium-workspace-v1", SESSION="premium-session-v1";
+  const read=()=>{try{return JSON.parse(localStorage.getItem(STORE)||"{}")}catch{return {}}};
+  const write=s=>localStorage.setItem(STORE,JSON.stringify(s));
+  const record=a=>{const s=read();s.events=s.events||[];s.events.unshift({t:new Date().toLocaleTimeString(),a});s.events=s.events.slice(0,120);write(s);if(typeof renderActivity==="function")renderActivity()};
+  const esc=s=>String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+  const stateLabel=()=>{const s=read();return s.plan||"Free"};
+  function sync(){
+    const s=read();s.plan=s.plan||"Free";s.premium=s.plan==="Premium"||s.plan==="Ultra Max Pro+";
+    write(s);
+    document.querySelectorAll("#premiumStatus").forEach(x=>x.textContent=s.premium?"Premium Active":"Free Plan");
+    document.querySelectorAll("#billingState").forEach(x=>x.textContent="Current plan: "+s.plan);
+  }
+  function plans(){
+    const s=read();
+    openModal("Choose your plan",
+      "<b>Current plan:</b> "+esc(stateLabel())+"<br><br>Choose a local subscription state for this browser. No payment is processed.",
+      "<div class='modal-actions'><button class='secondary' id='v17Free'>Stay Free</button><button class='primary' id='v17Premium'>Get Premium · ₹999/month</button></div>");
+    document.getElementById("v17Free").onclick=()=>{const x=read();x.plan="Free";x.premium=false;write(x);sync();record("Selected Free plan");closeModal();toast("Free plan is active on this browser.")};
+    document.getElementById("v17Premium").onclick=()=>{const x=read();x.plan="Premium";x.premium=true;x.accountValue=(x.accountValue||0)+999;write(x);sync();record("Activated Premium plan");closeModal();toast("Premium is now active on this browser.");if(typeof confetti==="function")confetti()};
+  }
+  function start(){const s=read();if(!s.plan){s.plan="Free";s.premium=false;write(s);record("Started free workspace")}else record("Opened workspace");sync();toast("Free workspace ready.") }
+  function session(){
+    let s=null;try{s=JSON.parse(localStorage.getItem(SESSION)||"null")}catch{}
+    if(s){openModal("Account session","Signed in as <b>"+esc(s.email)+"</b><br><br>Session stored on this browser.","<div class='modal-actions'><button class='secondary' id='v17SignOut'>Sign out</button><button class='primary' id='v17Account'>Open account</button></div>");
+      document.getElementById("v17SignOut").onclick=()=>{localStorage.removeItem(SESSION);document.getElementById("v13Session")?.classList.remove("show");closeModal();record("Signed out");toast("Signed out.")};
+      document.getElementById("v17Account").onclick=()=>{closeModal();accountOps("account")};return}
+    openModal("Sign in","Create a browser-local account session.","<input id='v17Name' placeholder='Your name' style='width:100%;padding:12px;border:1px solid #ddd;border-radius:9px;font:inherit><input id='v17Email' type='email' placeholder='you@company.com' style='width:100%;padding:12px;border:1px solid #ddd;border-radius:9px;font:inherit;margin-top:10px'><div class='modal-actions'><button class='primary' id='v17SignIn'>Continue</button></div>");
+    document.getElementById("v17SignIn").onclick=()=>{const email=document.getElementById("v17Email").value.trim(),name=document.getElementById("v17Name").value.trim();if(!email.includes("@")){toast("Enter a valid work email.");return}localStorage.setItem(SESSION,JSON.stringify({email,name:name||email.split("@")[0],signedInAt:new Date().toISOString()}));const p=document.getElementById("v13Session");if(p){p.textContent="Signed in · "+email;p.classList.add("show")}closeModal();record("Signed in");toast("Signed in on this browser.")};
+  }
+  function prefs(){
+    const reduced=localStorage.getItem("premium-reduced-motion")==="1",dark=document.body.dataset.theme==="dark";
+    openModal("Preferences","Manage browser-local workspace preferences.","<div class='pref-row'><span>Appearance</span><button class='secondary' id='v17Theme'>"+(dark?"Light":"Dark")+" appearance</button></div><div class='pref-row'><span>Reduced motion</span><button class='secondary' id='v17Motion'>"+(reduced?"Disable":"Enable")+" reduced motion</button></div><div class='modal-actions'><button class='primary' id='v17Done'>Done</button></div>");
+    document.getElementById("v17Theme").onclick=()=>{const x=read();x.theme=dark?"light":"dark";write(x);document.body.dataset.theme=x.theme;prefs()};
+    document.getElementById("v17Motion").onclick=()=>{localStorage.setItem("premium-reduced-motion",reduced?"0":"1");document.documentElement.classList.toggle("reduced-motion",!reduced);prefs()};
+    document.getElementById("v17Done").onclick=closeModal;
+  }
+  function install(){
+    if(window.__deferredPrompt){const p=window.__deferredPrompt;p.prompt();p.userChoice.then(r=>toast(r.outcome==="accepted"?"Premium installed.":"Installation cancelled.")).finally(()=>window.__deferredPrompt=null);return}
+    const ios=/iphone|ipad|ipod/i.test(navigator.userAgent)&&!window.navigator.standalone;
+    openModal("Install Premium",ios?"On iPhone or iPad, use Share → Add to Home Screen.":"Use your browser's Install app or Add to Home Screen option to install Premium.","<div class='modal-actions'><button class='primary' id='v17InstallDone'>Done</button></div>");document.getElementById("v17InstallDone").onclick=closeModal;
+  }
+  function shortcuts(){openModal("Keyboard shortcuts","<div class='v11-shortcuts'><span>Command palette</span><kbd>Ctrl K</kbd><span>Search</span><kbd>/</kbd><span>Close dialogs</span><kbd>Esc</kbd><span>Export workspace</span><kbd>Ctrl Shift E</kbd><span>Shortcuts</span><kbd>Ctrl Shift H</kbd></div>","<div class='modal-actions'><button class='primary' id='v17ShortcutDone'>Done</button></div>");document.getElementById("v17ShortcutDone").onclick=closeModal}
+  function route(a){
+    if(a==="upgrade")return plans(); if(a==="start")return start(); if(a==="login")return session(); if(a==="preferences")return prefs(); if(a==="install")return install(); if(a==="shortcuts")return shortcuts();
+    if(a==="theme"){const s=read();s.theme=s.theme==="dark"?"light":"dark";write(s);document.body.dataset.theme=s.theme;toast("Appearance updated.");return}
+    if(a==="mobileMenu"){const n=document.getElementById("mainNav"),b=document.getElementById("mobileMenu"),o=n?.classList.toggle("open");b?.setAttribute("aria-expanded",String(!!o));return}
+    if(a==="palette"){document.getElementById("commandPalette")?.classList.add("open");document.getElementById("commandPalette")?.setAttribute("aria-hidden","false");document.getElementById("commandInput")?.focus();return}
+    if(a==="free")return plans();
+    if(a==="demo"){if(typeof demo==="function")return demo();return}
+    if(a==="search"){if(typeof showSearch==="function")return showSearch();return}
+    if(a==="notifications"){if(typeof showNotifications==="function")return showNotifications();return}
+    if(a==="status"){if(typeof showStatus==="function")return showStatus();return}
+    if(a==="usage"){if(typeof showUsage==="function")return showUsage();return}
+    if(a==="invite"){if(typeof showInvite==="function")return showInvite();return}
+    if(a==="release"){if(typeof showRelease==="function")return showRelease();return}
+    if(a==="account"||a==="billing"||a==="history"){return accountOps(a)}
+    if(a==="support"||a.startsWith("support"))return support(a);
+    if(a==="export"&&window.PremiumV11)return PremiumV11.exportWorkspace();
+    if(a==="reset"&&window.PremiumV11)return PremiumV11.resetWorkspace();
+    if(a==="applyUpdate"){navigator.serviceWorker?.getRegistration().then(r=>r?.waiting?r.waiting.postMessage("SKIP_WAITING"):location.reload());return}
+    if(a==="closeAdmin"){document.getElementById("adminPanel")?.classList.remove("open");return}
+    if(["ai","speed","security","audit","enterprise"].includes(a))return action(a);
+    if(["access","risk","reconcile","team","documents"].includes(a))return window.__premiumV15Route?.(a);
+  }
+  window.addEventListener("click",e=>{const b=e.target.closest("[data-action]");if(!b)return;e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();try{route(b.dataset.action)}catch(err){console.error(err);toast("This action could not be completed.")}},true);
+  window.addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.shiftKey&&e.key.toLowerCase()==="e"){e.preventDefault();PremiumV11?.exportWorkspace?.()}if((e.ctrlKey||e.metaKey)&&e.shiftKey&&e.key.toLowerCase()==="h"){e.preventDefault();shortcuts()}});
+  window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();window.__deferredPrompt=e});
+  window.addEventListener("appinstalled",()=>{window.__deferredPrompt=null;record("Installed Premium PWA");toast("Premium is installed.")});
+  sync();
+})();
