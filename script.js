@@ -159,6 +159,12 @@
     const activeValue = sessionPlan === "Premium" ? 999 : sessionPlan === "Ultra Max Pro+" ? 49999 : 0;
     sessionPurchaseValue = activeValue;
     if (accountValue) accountValue.textContent = "₹" + activeValue.toLocaleString("en-IN");
+    const accountTrend = accountValue?.parentElement?.querySelector(".up");
+    if (accountTrend) {
+      accountTrend.textContent = activeValue > 0 ? "↑ active plan value" : "↑ 0.00%";
+      accountTrend.classList.toggle("muted", activeValue === 0);
+      accountTrend.classList.toggle("up", activeValue > 0);
+    }
     if (premiumStatus) premiumStatus.textContent = displayPlan(sessionPlan);
     if (billingState) billingState.textContent = "Current plan: " + sessionPlan;
     if (balanceValue) balanceValue.textContent = "₹" + activeValue.toLocaleString("en-IN");
