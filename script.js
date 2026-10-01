@@ -704,12 +704,33 @@
     shortcuts
   };
 
+  // V20 click engine: direct listeners + delegated fallback.
+  // Direct listeners are intentionally attached to every control so a browser
+  // or nested SVG/text target cannot prevent an action from firing.
+  function bindActions() {
+    $("[data-action]").forEach(button => {
+      if (button.dataset.boundPremium === "1") return;
+      button.dataset.boundPremium = "1";
+      button.addEventListener("click", event => {
+        event.preventDefault();
+        event.stopPropagation();
+        route(button.getAttribute("data-action"));
+      });
+      if (button.tagName === "BUTTON") {
+        button.type = "button";
+      }
+    });
+  }
+
+  bindActions();
+
   document.addEventListener("click", event => {
-    const target = event.target.closest("[data-action]");
-    if (!target) return;
+    const element = event.target instanceof Element ? event.target : null;
+    const target = element?.closest("[data-action]");
+    if (!target || target.dataset.boundPremium === "1") return;
     event.preventDefault();
-    route(target.dataset.action);
-  });
+    route(target.getAttribute("data-action"));
+  }, true);
 
   $("#modalClose")?.addEventListener("click", closeModal);
   $("#modalBackdrop")?.addEventListener("click", event => {
