@@ -186,3 +186,71 @@ body[data-theme="dark"] .support-panel button{background:#171b21;color:#eef1f5;b
 body[data-theme="dark"] .footer-action{color:#dfe4ea}
 body[data-theme="dark"] .theme-icon{color:#f6d879}
 @media(max-width:640px){#headerTheme{display:grid}}
+
+
+/* V27 — Command Center controls follow the active appearance */
+.dashboard{
+  background:var(--surface,#fff);
+  border-color:var(--border,#e4e7ec);
+}
+.dash-top{
+  background:var(--surface,#fff);
+  border-color:var(--border,#e4e7ec);
+}
+.dash-title{color:var(--text-muted,#68707d)}
+.command-strip{
+  background:var(--surface-2,#f7f8fb);
+  border-color:var(--border,#e4e7ec);
+}
+.command-strip button{
+  border:1px solid var(--border,#e4e7ec);
+  background:var(--surface,#fff);
+  color:var(--text,#111318);
+  border-radius:9px;
+  padding:7px 11px;
+  font-size:11px;
+  font-weight:750;
+  transition:transform .2s ease,background .2s ease,border-color .2s ease,box-shadow .2s ease;
+}
+.command-strip button:hover{
+  transform:translateY(-1px);
+  background:var(--surface-3,#eef0f4);
+  border-color:rgba(215,180,90,.55);
+  box-shadow:0 6px 16px rgba(16,18,23,.08);
+}
+.command-strip button:active{transform:scale(.985)}
+body[data-theme="dark"] .dashboard{
+  background:#14181e;
+  border-color:#2b3039;
+  box-shadow:0 25px 70px rgba(0,0,0,.28);
+}
+body[data-theme="dark"] .dash-top{
+  background:#14181e;
+  border-color:#2b3039;
+}
+body[data-theme="dark"] .command-strip{
+  background:#10141a;
+  border-color:#2b3039;
+}
+body[data-theme="dark"] .command-strip button{
+  background:#1b2028;
+  color:#eef1f5;
+  border-color:#343b46;
+  box-shadow:none;
+}
+body[data-theme="dark"] .command-strip button:hover{
+  background:#252b34;
+  border-color:rgba(215,180,90,.58);
+  box-shadow:0 7px 18px rgba(0,0,0,.22);
+}
+body[data-theme="dark"] .metric{
+  background:#14181e;
+  border-color:#2b3039;
+}
+body[data-theme="dark"] .activity{
+  background:#14181e;
+  border-color:#2b3039;
+}
+body[data-theme="dark"] .activity-row{
+  border-color:#252a32;
+}
