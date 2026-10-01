@@ -968,9 +968,8 @@ function bindActions() {
   }
 
   window.addEventListener("beforeinstallprompt", event => {
-    // Keep the native install event only long enough to trigger it from our
-    // explicit install button. prompt() is called from the user's click handler.
-    event.preventDefault();
+    // Do not cancel Chromium's native banner. Keeping the event also lets the
+    // explicit Install button use prompt() when the browser exposes it.
     window.__deferredPrompt = event;
     updatePwaInstallButton();
   });
