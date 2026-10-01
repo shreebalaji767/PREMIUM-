@@ -104,3 +104,85 @@ body[data-theme="dark"] .toast{background:#f3f5f8;color:#111318}
 body[data-theme="dark"] .offline-bar{background:#3a1f22;color:#ffdfe2}
 body[data-theme="dark"] .skip-link{background:#f3f5f8;color:#111318}
 @media(prefers-color-scheme:dark){body[data-theme="light"]{color-scheme:light}}
+
+
+/* V26 — unified Premium appearance system */
+:root{
+  --premium-gold:#d7b45a;
+  --premium-gold-soft:rgba(215,180,90,.12);
+  --premium-violet:#6c67c9;
+  --premium-violet-soft:#f0efff;
+  --surface:#ffffff;
+  --surface-2:#f7f8fb;
+  --surface-3:#eef0f4;
+  --text:#111318;
+  --text-muted:#68707d;
+  --border:#e4e7ec;
+}
+body[data-theme="light"]{
+  --surface:#ffffff;
+  --surface-2:#f7f8fb;
+  --surface-3:#eef0f4;
+  --text:#111318;
+  --text-muted:#68707d;
+  --border:#e4e7ec;
+  --premium-violet-soft:#f0efff;
+}
+body[data-theme="dark"]{
+  --surface:#14171c;
+  --surface-2:#101318;
+  --surface-3:#1c2027;
+  --text:#f5f6f8;
+  --text-muted:#a7afbb;
+  --border:#2b3039;
+  --premium-violet-soft:#20203a;
+}
+body{color:var(--text)}
+.nav{background:color-mix(in srgb,var(--surface) 88%,transparent);border-color:var(--border)}
+.nav nav{color:var(--text-muted)}
+.nav nav a:hover,.footer-links a:hover{color:var(--text)}
+.icon-btn,.ghost,.secondary,.plan-btn,.light-btn{
+  background:var(--surface);
+  color:var(--text);
+  border-color:var(--border);
+}
+.icon-btn:hover,.ghost:hover,.secondary:hover,.plan-btn:hover{background:var(--surface-2);border-color:rgba(215,180,90,.45)}
+.primary,.nav-cta{background:linear-gradient(135deg,#17191f,#2a2e37);border-color:#17191f;color:#fff}
+.primary:hover,.nav-cta:hover{box-shadow:0 14px 32px rgba(16,18,23,.22),0 0 0 3px var(--premium-gold-soft)}
+.eyebrow,.hero h1 em{color:var(--premium-violet)}
+.icon{background:var(--premium-violet-soft);color:var(--premium-violet)}
+.features,.plan,.usage-card,.account-card,.ops-card,.control-card,.intel-card,.dashboard{
+  background:var(--surface);border-color:var(--border);
+}
+.workspace,.account-center,.control-center{background:var(--surface-2)}
+.ops-center,.intelligence{background:var(--surface)}
+.testimonial{background:var(--surface-2)}
+.activity-row,.billing-line,.intel-stat{border-color:var(--border)}
+.activity-row:hover,.admin-row:hover{background:var(--premium-gold-soft)}
+.progress,.intel-meter{background:var(--surface-3)}
+.progress i,.intel-meter i{background:linear-gradient(90deg,var(--premium-violet),var(--premium-gold))}
+.plan.featured{border-color:rgba(215,180,90,.7);box-shadow:0 20px 50px rgba(215,180,90,.10)}
+.popular{background:linear-gradient(135deg,#625df2,#d7b45a)}
+.final-cta{background:radial-gradient(circle at 50% 0,rgba(215,180,90,.16),transparent 42%),linear-gradient(135deg,var(--premium-violet-soft),var(--surface))}
+.brand-mark{background:linear-gradient(145deg,#17191f,#0d0f14);border-color:rgba(233,200,107,.32)}
+.theme-icon{display:grid;place-items:center;width:18px;height:18px;font-size:15px;line-height:1;transition:transform .25s ease}
+#headerTheme:hover .theme-icon{transform:rotate(18deg)}
+body[data-theme="dark"] .hero{background:radial-gradient(circle at 50% 0,#202044 0,rgba(32,32,68,0) 42%),linear-gradient(#0b0d11,#101318)}
+body[data-theme="dark"] .hero h1 em{color:#b8b5ff}
+body[data-theme="dark"] .features article,
+body[data-theme="dark"] .metric{border-color:var(--border)}
+body[data-theme="dark"] .activity-row{color:#a7afbb}
+body[data-theme="dark"] .activity-row b{color:#eef1f5}
+body[data-theme="dark"] .command-strip{background:#11151b;border-color:var(--border)}
+body[data-theme="dark"] .live{background:#12382e;color:#52ddb0}
+body[data-theme="dark"] .testimonial{color:#eef1f5}
+body[data-theme="dark"] .faq-list,body[data-theme="dark"] details{border-color:var(--border)}
+body[data-theme="dark"] summary{color:#eef1f5}
+body[data-theme="dark"] .support-panel,
+body[data-theme="dark"] .v12-update,
+body[data-theme="dark"] .v13-session,
+body[data-theme="dark"] .version-pill{background:rgba(20,23,28,.96);color:#eef1f5;border-color:var(--border)}
+body[data-theme="dark"] .support-panel button{background:#171b21;color:#eef1f5;border-color:var(--border)}
+body[data-theme="dark"] .footer-action{color:#dfe4ea}
+body[data-theme="dark"] .theme-icon{color:#f6d879}
+@media(max-width:640px){#headerTheme{display:grid}}
