@@ -1,5 +1,6 @@
-const CACHE="premium-v15";const CORE=["./","./index.html","./style.css","./script.js","./manifest.webmanifest","./icon.svg"];
-self.addEventListener("install",e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)).then(()=>self.skipWaiting())));
-self.addEventListener("activate",e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
-self.addEventListener("message",e=>{if(e.data==="SKIP_WAITING")self.skipWaiting()});
-self.addEventListener("fetch",e=>{if(e.request.method!=="GET")return;const url=new URL(e.request.url);if(url.pathname.endsWith("/")||url.pathname.endsWith(".html")||url.pathname.endsWith(".js")||url.pathname.endsWith(".css")){e.respondWith(fetch(e.request).then(r=>{if(r.ok){const copy=r.clone();caches.open(CACHE).then(c=>c.put(e.request,copy))}return r}).catch(()=>caches.match(e.request).then(r=>r||caches.match("./index.html"))));return}e.respondWith(caches.match(e.request).then(cached=>cached||fetch(e.request).then(r=>{if(r.ok){const copy=r.clone();caches.open(CACHE).then(c=>c.put(e.request,copy))}return r}).catch(()=>caches.match("./index.html"))))});
+const CACHE="premium-v16";
+const CORE=["./","./index.html","./style.css?v=16","./script.js?v=16","./manifest.webmanifest?v=16","./icon.svg?v=16"];
+self.addEventListener("install",event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(CORE)).then(()=>self.skipWaiting())));
+self.addEventListener("activate",event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
+self.addEventListener("message",event=>{if(event.data==="SKIP_WAITING")self.skipWaiting()});
+self.addEventListener("fetch",event=>{if(event.request.method!=="GET")return;const request=event.request;const url=new URL(request.url);if(url.origin!==self.location.origin)return;event.respondWith((async()=>{try{const response=await fetch(request,{cache:"no-store"});if(response.ok){const cache=await caches.open(CACHE);await cache.put(request,response.clone())}return response}catch(err){const cached=await caches.match(request);if(cached)return cached;if(request.mode==="navigate")return caches.match("./index.html");throw err}})())});
