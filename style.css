@@ -545,3 +545,80 @@ body[data-theme="dark"] .signal-ticker{border-color:#303640}
 @media(max-width:800px){.live-rail{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:520px){.live-rail{grid-template-columns:1fr 1fr;width:calc(100% - 28px)}.live-signal{min-height:62px;padding:10px}.live-clock{display:none}.signal-ticker{width:calc(100% - 28px);border-radius:13px;padding:8px 11px}.signal-ticker b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}
 @media(prefers-reduced-motion:reduce){.live-signal{transition:none}}
+
+/* V31 — pricing card hierarchy + CTA repair */
+.plans .plan.featured{
+  position:relative;
+  overflow:hidden;
+  transform:translateY(-6px);
+  border:1px solid rgba(108,103,201,.34);
+  box-shadow:0 24px 60px rgba(35,32,76,.13);
+}
+.plans .plan.featured .popular{
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  min-height:30px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:linear-gradient(90deg,#5f5ac7,#7b73e7);
+  color:#fff;
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:.13em;
+  padding:7px 12px;
+}
+.plans .plan.featured .plan-name{
+  display:block;
+  padding-top:28px;
+  color:var(--text,#111318);
+}
+.plans .plan.featured .price{
+  margin-top:6px;
+  font-size:clamp(31px,4vw,42px);
+  letter-spacing:-.055em;
+  white-space:nowrap;
+}
+.plans .plan.featured .price small{
+  font-size:12px;
+  font-weight:650;
+  letter-spacing:0;
+  color:var(--muted,#68707d);
+}
+.plans .plan.featured p{
+  max-width:250px;
+}
+.plans .plan.featured ul{
+  margin-top:22px;
+  margin-bottom:25px;
+}
+.plans .plan.featured li{
+  padding:8px 0;
+}
+.plans .plan.featured .plan-btn{
+  width:100%;
+  min-height:48px;
+  border-radius:12px;
+  font-size:13px;
+  font-weight:850;
+  box-shadow:0 10px 24px rgba(91,91,247,.18);
+}
+.plans .plan.featured .plan-btn:hover{
+  transform:translateY(-2px);
+  box-shadow:0 14px 30px rgba(91,91,247,.24);
+}
+body[data-theme="dark"] .plans .plan.featured{
+  border-color:rgba(139,132,255,.42);
+  box-shadow:0 24px 65px rgba(0,0,0,.28);
+}
+body[data-theme="dark"] .plans .plan.featured .plan-name{
+  color:var(--text,#f5f6f8);
+}
+@media(max-width:800px){
+  .plans .plan.featured{transform:none}
+}
+@media(prefers-reduced-motion:reduce){
+  .plans .plan.featured .plan-btn{transition:none}
+}
