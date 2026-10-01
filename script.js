@@ -243,3 +243,17 @@ const originalUpgrade=window.upgrade;if(typeof originalUpgrade==="function"){win
  document.querySelectorAll("#mainNav a").forEach(a=>a.addEventListener("click",()=>{document.querySelectorAll("#mainNav a").forEach(x=>x.removeAttribute("aria-current"));a.setAttribute("aria-current","page")}));
  showSession();
 })();
+
+/* V14 — hardening layer: make core controls work even if older handlers are present */
+(function(){
+ const $id=id=>document.getElementById(id);
+ const safe=(fn)=>{try{fn()}catch(e){console.error("Premium control error",e);toast("This action could not be completed.")}};
+ $id("headerSearch")?.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();safe(()=>showSearch())},true);
+ $id("headerNotifications")?.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();safe(()=>showNotifications())},true);
+ $id("headerLogin")?.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();safe(()=>window.__premiumV13Login?window.__premiumV13Login():action("login"))},true);
+ $id("headerTheme")?.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();safe(()=>{const d=document.body;d.dataset.theme=d.dataset.theme==="dark"?"light":"dark";const x=JSON.parse(localStorage.getItem("premium-workspace-v1")||"{}");x.theme=d.dataset.theme;localStorage.setItem("premium-workspace-v1",JSON.stringify(x));toast("Appearance updated.")})},true);
+ $id("headerUpgrade")?.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();safe(()=>action("upgrade"))},true);
+ $id("mobileMenu")?.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();const n=$id("mainNav");const open=n?.classList.toggle("open");e.currentTarget.setAttribute("aria-expanded",String(!!open))},true);
+ document.querySelectorAll("[data-action='demo']").forEach(b=>b.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();safe(()=>window.__premiumV13Demo?window.__premiumV13Demo():action("demo"))},true));
+ document.addEventListener("keydown",e=>{if(e.key==="/"&&!/input|textarea/i.test(document.activeElement?.tagName||"")){e.preventDefault();safe(()=>showSearch())}},true);
+})();
