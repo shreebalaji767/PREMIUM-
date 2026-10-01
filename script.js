@@ -94,15 +94,19 @@
       headerUpgrade.setAttribute("aria-label", paid ? "Premium is active" : "Get Premium");
     }
 
-    $$("[data-plan-status]").forEach(el => {
-      el.textContent = paid ? "Premium" : "Free";
-      el.classList.toggle("is-active", paid);
+    $("[data-plan-status]").forEach(el => {
+      const plan = el.dataset.plan || "";
+      const current = plan === state.plan;
+      el.textContent = current ? "Current" : (plan === "Free" ? "Free" : plan);
+      el.classList.toggle("is-active", current);
     });
 
     const premiumButton = $("#planPremium");
     const ultraButton = $("#planUltra");
+    const freeButton = $("#planFree");
     if (premiumButton) premiumButton.textContent = state.plan === "Premium" ? "Premium · Active" : "Premium · ₹999/month";
     if (ultraButton) ultraButton.textContent = state.plan === "Ultra Max Pro+" ? "Ultra Max Pro+ · Active" : "Ultra Max Pro+ · ₹49,999/month";
+    if (freeButton) freeButton.textContent = state.plan === "Free" ? "Free · Current" : "Stay Free";
   }
 
   function renderState() {
@@ -592,10 +596,21 @@
 
   function install() {
     const standalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
-    if (standalone) return;
+    if (standalone) {
+      toast("Premium is already installed.");
+      return;
+    }
+    if (window.__deferredPrompt) {
+      window.__deferredPrompt.prompt();
+      window.__deferredPrompt.userChoice.finally(() => {
+        window.__deferredPrompt = null;
+        updatePwaInstallButton();
+      });
+      return;
+    }
     openModal(
       "Install Premium",
-      "Use your browser's Install app or Add to Home Screen option to install Premium."
+      "Your browser has not exposed the install prompt yet. Use the browser menu and choose <b>Install app</b> or <b>Add to Home Screen</b> when available."
     );
   }
 
@@ -907,16 +922,16 @@ function bindActions() {
     const button = $("#pwaInstallButton");
     if (!button) return;
     const standalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
-    if (standalone) {
-      button.hidden = true;
-      return;
-    }
-    // Install UI is intentionally browser-native now. Older Chromium builds may
-    // expose beforeinstallprompt, but intercepting that event can generate a
-    // "Banner not shown" warning when the prompt is not consumed.
-    button.hidden = true;
-    button.classList.remove("ready");
+    const ready = Boolean(window.__deferredPrompt);
+    button.hidden = standalone || !ready;
+    button.classList.toggle("ready", ready);
   }
+
+  window.addEventListener("beforeinstallprompt", event => {
+    event.preventDefault();
+    window.__deferredPrompt = event;
+    updatePwaInstallButton();
+  });
 
   window.addEventListener("DOMContentLoaded", updatePwaInstallButton);
   window.matchMedia("(display-mode: standalone)").addEventListener?.("change", updatePwaInstallButton);
@@ -936,7 +951,7 @@ function bindActions() {
       window.location.reload();
     });
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./sw.js?v=42", { updateViaCache: "none" }).catch(() => {});
+      navigator.serviceWorker.register("./sw.js?v=43", { updateViaCache: "none" }).catch(() => {});
     });
   }
 
