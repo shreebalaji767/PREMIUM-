@@ -594,47 +594,11 @@
   }
 
   function install() {
-    const prompt = window.__deferredPrompt;
-    if (prompt && !window.__installPromptInFlight) {
-      window.__installPromptInFlight = true;
-
-      // Call prompt() synchronously from the actual click path. Chromium
-      // requires the stored beforeinstallprompt event to be prompted once
-      // from a user action; awaiting before this call can lose activation.
-      let resultPromise;
-      try {
-        resultPromise = prompt.prompt();
-      } catch {
-        window.__deferredPrompt = null;
-        window.__installPromptInFlight = false;
-        updatePwaInstallButton();
-        toast("Install prompt is no longer available.");
-        return;
-      }
-
-      Promise.resolve(resultPromise).then(result => {
-        const outcome = result?.outcome || "dismissed";
-        if (outcome === "accepted") {
-          toast("Premium is being installed.");
-        } else {
-          toast("Install prompt dismissed.");
-        }
-      }).catch(() => {
-        toast("Install prompt is no longer available.");
-      }).finally(() => {
-        window.__deferredPrompt = null;
-        window.__installPromptInFlight = false;
-        updatePwaInstallButton();
-      });
-      return;
-    }
-
-    const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.navigator.standalone;
+    const standalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+    if (standalone) return;
     openModal(
       "Install Premium",
-      ios
-        ? "Use Share → Add to Home Screen."
-        : "Use your browser's Install app or Add to Home Screen option."
+      "Use your browser's Install app or Add to Home Screen option to install Premium."
     );
   }
 
@@ -950,29 +914,12 @@ function bindActions() {
       button.hidden = true;
       return;
     }
-    if (window.__deferredPrompt) {
-      button.hidden = false;
-      button.classList.add("ready");
-      button.title = "Install Premium app";
-      button.setAttribute("aria-label", "Install Premium app");
-      button.querySelector("span")?.replaceChildren(document.createTextNode("Install app"));
-    } else {
-      // The native prompt is unavailable in this browser/session. Keep the
-      // fallback reachable through the footer/command palette, but don't show
-      // a misleading floating install button.
-      button.hidden = true;
-      button.classList.remove("ready");
-      button.title = "Install Premium app";
-      button.setAttribute("aria-label", "Install Premium app");
-    }
+    // Install UI is intentionally browser-native now. Older Chromium builds may
+    // expose beforeinstallprompt, but intercepting that event can generate a
+    // "Banner not shown" warning when the prompt is not consumed.
+    button.hidden = true;
+    button.classList.remove("ready");
   }
-
-  window.addEventListener("beforeinstallprompt", event => {
-    // Retain the event for the explicit Install button.
-    // Do not cancel it: Chromium can then use its native install UI normally.
-    window.__deferredPrompt = event;
-    updatePwaInstallButton();
-  });
 
   window.addEventListener("DOMContentLoaded", updatePwaInstallButton);
   window.matchMedia("(display-mode: standalone)").addEventListener?.("change", updatePwaInstallButton);
