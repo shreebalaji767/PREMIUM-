@@ -208,3 +208,38 @@ const originalUpgrade=window.upgrade;if(typeof originalUpgrade==="function"){win
     toast("Appearance updated.");
   });
 })();
+
+/* V13 — real browser-local account session, search, demo and responsive navigation */
+(function(){
+ const S="premium-session-v1", q=s=>document.querySelector(s);
+ const read=()=>{try{return JSON.parse(localStorage.getItem(S)||"null")}catch{return null}};
+ const write=v=>localStorage.setItem(S,JSON.stringify(v));
+ const session=q("#v13Session");
+ function showSession(){const a=read();if(!session)return;if(a){session.textContent="Signed in · "+a.email;session.classList.add("show")}else session.classList.remove("show")}
+ function signin(e){
+   e.preventDefault();const email=q("#v13Email").value.trim(),name=q("#v13Name").value.trim();
+   if(!email||!email.includes("@")){toast("Enter a valid work email.");return}
+   write({email,name:name||email.split("@")[0],signedInAt:new Date().toISOString()});showSession();closeModal();toast("Signed in on this browser.");addActivity("Signed in to workspace");
+ }
+ function login(){
+   const a=read();
+   if(a){openModal("Account session","Signed in as <b>"+a.email+"</b>.","<div class='modal-actions'><button class='secondary' id='v13SignOut'>Sign out</button><button class='primary' id='v13Account'>Open account</button></div>");q("#v13SignOut").onclick=()=>{localStorage.removeItem(S);showSession();closeModal();toast("Signed out.")};q("#v13Account").onclick=()=>{closeModal();accountOps("account")};return}
+   openModal("Sign in","Use a browser-local workspace session. No server credentials are required for this static workspace.","<label style='display:block;margin:12px 0 6px;font-size:12px'>Name</label><input id='v13Name' placeholder='Your name' style='width:100%;padding:12px;border:1px solid #ddd;border-radius:9px;font:inherit'><label style='display:block;margin:12px 0 6px;font-size:12px'>Work email</label><input id='v13Email' type='email' placeholder='you@company.com' style='width:100%;padding:12px;border:1px solid #ddd;border-radius:9px;font:inherit'><div class='modal-actions'><button class='primary' id='v13SignIn'>Continue</button></div>");q("#v13SignIn").onclick=signin;
+ }
+ function search(){
+   openModal("Search Premium","Search the sections and workspace controls available on this page.","<input id='v13Search' placeholder='Try: security, billing, AI, pricing...' style='width:100%;padding:13px;border:1px solid #ddd;border-radius:10px;font:inherit><div id='v13Results' style='margin-top:12px'></div>");
+   const input=q("#v13Search"),out=q("#v13Results");const items=[...document.querySelectorAll("main section[id]")].map(x=>({id:x.id,text:(x.innerText||"").replace(/\\s+/g," ").slice(0,180)}));
+   const run=()=>{const term=input.value.trim().toLowerCase();const hits=term?items.filter(x=>(x.id+" "+x.text).toLowerCase().includes(term)):items.slice(0,5);out.innerHTML=hits.map(x=>'<button class="secondary v13-result" data-jump="'+x.id+'" style="display:block;width:100%;text-align:left;margin:6px 0">'+x.id+' · '+x.text.slice(0,90)+'</button>').join("")||"<small>No matching workspace section.</small>"};
+   input.oninput=run;run();out.onclick=e=>{const b=e.target.closest("[data-jump]");if(!b)return;closeModal();document.getElementById(b.dataset.jump)?.scrollIntoView({behavior:"smooth",block:"start"});addActivity("Searched workspace")};
+ }
+ function demo(){openModal("Interactive demo","Explore the workspace directly. Choose a section to jump into it.","<div class='modal-actions'><button class='secondary' id='v13DemoFeatures'>Features</button><button class='secondary' id='v13DemoBilling'>Billing</button><button class='primary' id='v13DemoSecurity'>Security</button></div>");q("#v13DemoFeatures").onclick=()=>{closeModal();document.getElementById("features")?.scrollIntoView({behavior:"smooth"})};q("#v13DemoBilling").onclick=()=>{closeModal();accountOps("billing")};q("#v13DemoSecurity").onclick=()=>{closeModal();document.getElementById("security")?.scrollIntoView({behavior:"smooth"})}}
+ document.addEventListener("click",e=>{
+   const b=e.target.closest("[data-action]");if(!b)return;const a=b.dataset.action;
+   if(a==="login"){e.preventDefault();e.stopImmediatePropagation();login()}
+   if(a==="search"){e.preventDefault();e.stopImmediatePropagation();search()}
+   if(a==="demo"){e.preventDefault();e.stopImmediatePropagation();demo()}
+ });
+ const mm=q("#mobileMenu"),nav=q("#mainNav");mm?.addEventListener("click",()=>{const open=nav.classList.toggle("open");mm.setAttribute("aria-expanded",String(open))});nav?.querySelectorAll("a").forEach(a=>a.addEventListener("click",()=>{nav.classList.remove("open");mm?.setAttribute("aria-expanded","false")}));
+ document.querySelectorAll("#mainNav a").forEach(a=>a.addEventListener("click",()=>{document.querySelectorAll("#mainNav a").forEach(x=>x.removeAttribute("aria-current"));a.setAttribute("aria-current","page")}));
+ showSession();
+})();
