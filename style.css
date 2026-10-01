@@ -64,3 +64,9 @@ section{scroll-margin-top:96px}
 .reduced-motion *,.reduced-motion *::before,.reduced-motion *::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}
 @media (max-width:760px){.nav{padding-left:16px;padding-right:16px}.hero{padding-top:72px}.hero h1{font-size:clamp(2.7rem,12vw,4.4rem)}.pref-row{align-items:flex-start;flex-direction:column}.modal{max-height:88vh;overflow:auto}}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.reduced-motion *{animation:none!important;transition:none!important}}
+
+/* V21 — interaction polish */
+button,a{ -webkit-tap-highlight-color:transparent }
+button:focus-visible,a:focus-visible{outline:2px solid var(--premium-gold,#d7b45a);outline-offset:3px}
+button:active{transform:translateY(0) scale(.985)}
+.nav .icon-btn,.nav .ghost,.nav .nav-cta,.hero-actions button,.plan-btn{position:relative;z-index:1}
