@@ -102,7 +102,7 @@
       headerUpgrade.setAttribute("aria-label", paid ? "Premium is active" : "Get Premium");
     }
 
-    $("[data-plan-status]").forEach(el => {
+    $$("[data-plan-status]").forEach(el => {
       el.textContent = paid ? "Premium" : "Free";
       el.classList.toggle("is-active", paid);
     });
