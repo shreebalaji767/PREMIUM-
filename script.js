@@ -42,6 +42,13 @@
     return plan === "Premium" || plan === "Ultra Max Pro+";
   }
 
+  // The Command Center has one customer-facing paid label: Premium.
+  // Ultra Max Pro+ is an internal billing selection only; both paid plans
+  // persist locally and display as Premium after a page refresh.
+  function displayPlan(plan) {
+    return isPaidPlan(plan) ? "Premium" : "Free";
+  }
+
   state.visits = Number(state.visits || 0) + 1;
   state.premium = isPaidPlan(state.plan);
   writeState(state);
@@ -96,7 +103,7 @@
     if (accountValue) accountValue.textContent = "₹" + Number(state.accountValue || 0).toLocaleString("en-IN");
     // Command Center intentionally shows the product tier, not the billing SKU:
     // Premium and Ultra Max Pro+ purchases both display simply as "Premium".
-    if (premiumStatus) premiumStatus.textContent = isPaidPlan(state.plan) ? "Premium" : "Free";
+    if (premiumStatus) premiumStatus.textContent = displayPlan(state.plan);
     if (billingState) billingState.textContent = "Current plan: " + state.plan;
     if (balanceValue) balanceValue.textContent = "₹" + Number(state.accountValue || 0).toLocaleString("en-IN");
     if (eventCount) eventCount.textContent = state.events.length + " events";
@@ -212,7 +219,7 @@
       writeState(state);
       record("Activated " + label + " plan");
       closeModal();
-      toast(label + " is active. Command Center status: Premium.");
+      toast("Purchase complete. Command Center status: Premium.");
       confetti();
     };
 
