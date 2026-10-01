@@ -747,7 +747,7 @@ function premiumActionFeedback(kind) {
 }
 
 function bindActions() {
-    $("[data-action]").forEach(button => {
+    document.querySelectorAll("[data-action]").forEach(button => {
       if (button.dataset.boundPremium === "1") return;
       button.dataset.boundPremium = "1";
       button.addEventListener("click", event => {
