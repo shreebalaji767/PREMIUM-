@@ -180,38 +180,44 @@
 
   function choosePlan() {
     state = readState();
+    const current = isPaidPlan(state.plan) ? "Premium" : "Free";
+
     openModal(
       "Choose your plan",
-      "<b>Current plan:</b> " + escapeHtml(state.plan) +
-      "<br><br>Select the plan state you want this browser to use.",
-      '<div class="modal-actions">' +
-        '<button class="secondary" id="planFree">Stay Free</button>' +
-        '<button class="primary" id="planPremium">Get Premium · ₹999/month</button>' +
+      "<b>Current status:</b> " + current +
+      "<br><br>Choose a plan to activate on this browser.",
+      '<div class="modal-actions" style="display:grid;gap:9px">' +
+        '<button class="secondary" id="planFree">Free · ₹0/month</button>' +
+        '<button class="primary" id="planPremium">Premium · ₹999/month</button>' +
+        '<button class="primary" id="planUltra">Ultra Max Pro+ · ₹49,999/month</button>' +
       "</div>"
     );
 
     $("#planFree").onclick = () => {
       state = readState();
       state.plan = "Free";
-      state.premium = isPaidPlan(state.plan);
+      state.premium = false;
       writeState(state);
       record("Selected Free plan");
       closeModal();
       toast("Free plan is active on this browser.");
     };
 
-    $("#planPremium").onclick = () => {
+    const activatePaid = (plan, label, price) => {
       state = readState();
-      const wasPremium = state.premium;
-      state.plan = "Premium";
+      const wasPaid = isPaidPlan(state.plan);
+      state.plan = plan;
       state.premium = true;
-      if (!wasPremium) state.accountValue = Number(state.accountValue || 0) + 999;
+      if (!wasPaid) state.accountValue = Number(state.accountValue || 0) + price;
       writeState(state);
-      record("Activated Premium plan");
+      record("Activated " + label + " plan");
       closeModal();
-      toast("Premium is now active on this browser.");
+      toast(label + " is active. Command Center status: Premium.");
       confetti();
     };
+
+    $("#planPremium").onclick = () => activatePaid("Premium", "Premium", 999);
+    $("#planUltra").onclick = () => activatePaid("Ultra Max Pro+", "Ultra Max Pro+", 49999);
   }
 
   function startWorkspace() {
