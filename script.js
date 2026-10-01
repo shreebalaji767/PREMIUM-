@@ -157,3 +157,39 @@ const originalUpgrade=window.upgrade;if(typeof originalUpgrade==="function"){win
 
   window.PremiumV11={exportWorkspace,resetWorkspace,shortcuts};
 })();
+
+/* V12 — notification center, command routing and PWA update flow */
+(function(){
+  const K="premium-workspace-v1";
+  const get=()=>{try{return JSON.parse(localStorage.getItem(K)||"{}")}catch{return {}}};
+  function setUnread(){const d=$("#notifyDot");if(!d)return;d.style.display="block";d.setAttribute("aria-label","Unread notifications")}
+  function clearUnread(){const d=$("#notifyDot");if(!d)return;d.style.display="none"}
+  window.handleAction=function(type){
+    if(type==="billing"||type==="history"||type==="account"){accountOps(type);return}
+    if(type==="audit"||type==="security"){action(type);return}
+    if(type==="preferences"||type==="theme"||type==="install"||type==="upgrade"){action(type);return}
+    if(type==="usage"){showUsage();return}
+    if(type==="release"){showRelease();return}
+  };
+  document.addEventListener("click",e=>{
+    const b=e.target.closest("[data-action]");if(!b)return;
+    if(b.dataset.action==="notifications"){showNotifications();clearUnread()}
+    if(b.dataset.action==="applyUpdate"){location.reload()}
+  });
+  const s=get();
+  if((s.events||[]).length>0)setUnread();
+
+  let waitingWorker=null;
+  if("serviceWorker" in navigator){
+    navigator.serviceWorker.getRegistration().then(reg=>{
+      if(!reg)return;
+      if(reg.waiting){waitingWorker=reg.waiting;$("#v12Update")?.classList.add("show")}
+      reg.addEventListener("updatefound",()=>{
+        const w=reg.installing;if(!w)return;
+        w.addEventListener("statechange",()=>{if(w.state==="installed"&&navigator.serviceWorker.controller){waitingWorker=w;$("#v12Update")?.classList.add("show")}});
+      });
+    }).catch(()=>{});
+    document.addEventListener("click",e=>{if(e.target.closest("[data-action='applyUpdate']")&&waitingWorker){waitingWorker.postMessage("SKIP_WAITING")}});
+    navigator.serviceWorker.addEventListener("controllerchange",()=>{if(waitingWorker)location.reload()});
+  }
+})();
