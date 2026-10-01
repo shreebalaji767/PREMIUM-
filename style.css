@@ -70,3 +70,37 @@ button,a{ -webkit-tap-highlight-color:transparent }
 button:focus-visible,a:focus-visible{outline:2px solid var(--premium-gold,#d7b45a);outline-offset:3px}
 button:active{transform:translateY(0) scale(.985)}
 .nav .icon-btn,.nav .ghost,.nav .nav-cta,.hero-actions button,.plan-btn{position:relative;z-index:1}
+
+/* V25 appearance system — complete light/dark surface coverage */
+html{color-scheme:light}
+body[data-theme="light"]{color-scheme:light}
+body[data-theme="dark"]{color-scheme:dark;background:#0b0d11;color:#eef1f5;--ink:#eef1f5;--muted:#a7afbb;--line:#292e38;--soft:#11151b;--white:#0f1217}
+body[data-theme="dark"] .nav{background:rgba(11,13,17,.88);border-color:#292e38}
+body[data-theme="dark"] .nav nav{color:#a7afbb}
+body[data-theme="dark"] .nav nav a:hover,body[data-theme="dark"] .footer-links a:hover{color:#fff}
+body[data-theme="dark"] .hero{background:radial-gradient(circle at 50% 0,#202044 0,rgba(32,32,68,0) 42%),linear-gradient(#0b0d11,#0f1217)}
+body[data-theme="dark"] .hero-copy,body[data-theme="dark"] .section-head p{color:#a7afbb}
+body[data-theme="dark"] .ghost,body[data-theme="dark"] .secondary,body[data-theme="dark"] .plan-btn,body[data-theme="dark"] .light-btn{background:#151920;color:#eef1f5;border-color:#303640}
+body[data-theme="dark"] .section,body[data-theme="dark"] .plan,body[data-theme="dark"] .usage-card,body[data-theme="dark"] .account-card,body[data-theme="dark"] .ops-card,body[data-theme="dark"] .control-card,body[data-theme="dark"] .intel-card{background:#14181e;border-color:#2b3039;color:#eef1f5}
+body[data-theme="dark"] .card,body[data-theme="dark"] .dashboard-card,body[data-theme="dark"] .feature-card,body[data-theme="dark"] .security-card{background:#14181e;border-color:#2b3039}
+body[data-theme="dark"] .muted,body[data-theme="dark"] small{color:#9ca5b2}
+body[data-theme="dark"] .progress{background:#292e38}
+body[data-theme="dark"] .modal{background:#14181e;color:#eef1f5}
+body[data-theme="dark"] .modal p,body[data-theme="dark"] .modal label{color:#a7afbb}
+body[data-theme="dark"] .modal-x{background:#222730;color:#eef1f5}
+body[data-theme="dark"] .receipt{background:#0e1217;border-color:#39404b;color:#dfe4ea}
+body[data-theme="dark"] .chaos{background:#241f13;border-color:#5a4b25;color:#f1dfad}
+body[data-theme="dark"] input,body[data-theme="dark"] textarea,body[data-theme="dark"] select{background:#0f1319;color:#eef1f5;border-color:#343b46}
+body[data-theme="dark"] input::placeholder,body[data-theme="dark"] textarea::placeholder{color:#727b88}
+body[data-theme="dark"] .footer{background:#090b0f;color:#d9dee6;border-color:#292e38}
+body[data-theme="dark"] .announcement{background:#07090d}
+body[data-theme="dark"] .support-toggle{background:#eef1f5;color:#111318}
+body[data-theme="dark"] .command-palette{background:#14181e;color:#eef1f5;border-color:#303640}
+body[data-theme="dark"] .command-item{border-color:#292e38}
+body[data-theme="dark"] .command-item:hover{background:#1d222a}
+body[data-theme="dark"] .mobile-menu{color:#eef1f5}
+body[data-theme="dark"] .brand-mark{background:#171b22}
+body[data-theme="dark"] .toast{background:#f3f5f8;color:#111318}
+body[data-theme="dark"] .offline-bar{background:#3a1f22;color:#ffdfe2}
+body[data-theme="dark"] .skip-link{background:#f3f5f8;color:#111318}
+@media(prefers-color-scheme:dark){body[data-theme="light"]{color-scheme:light}}
