@@ -852,13 +852,45 @@ function bindActions() {
     }
   });
 
+  function updatePwaInstallButton() {
+    const button = $(" #pwaInstallButton".trim());
+    if (!button) return;
+    const standalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+    if (standalone) {
+      button.hidden = true;
+      return;
+    }
+    button.hidden = false;
+    if (window.__deferredPrompt) {
+      button.classList.add("ready");
+      button.title = "Install Premium app";
+      button.setAttribute("aria-label", "Install Premium app");
+      button.querySelector("span")?.replaceChildren(document.createTextNode("Install app"));
+    } else {
+      button.classList.remove("ready");
+      button.title = "Premium app install available from your browser menu";
+      button.setAttribute("aria-label", "Premium app install available from your browser menu");
+      button.querySelector("span")?.replaceChildren(document.createTextNode("Add app"));
+    }
+  }
+
   window.addEventListener("beforeinstallprompt", event => {
     event.preventDefault();
     window.__deferredPrompt = event;
+    updatePwaInstallButton();
   });
 
   window.addEventListener("appinstalled", () => {
     window.__deferredPrompt = null;
+    updatePwaInstallButton();
+  });
+
+  window.addEventListener("DOMContentLoaded", updatePwaInstallButton);
+  window.matchMedia("(display-mode: standalone)").addEventListener?.("change", updatePwaInstallButton);
+
+  window.addEventListener("appinstalled", () => {
+    window.__deferredPrompt = null;
+    updatePwaInstallButton();
     record("Installed Premium");
     toast("Premium is installed.");
   });
