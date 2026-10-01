@@ -23,6 +23,18 @@
     notificationsRead: false
   };
 
+  // Plan state is session-only. A fresh page load always starts on Free.
+  let sessionPlan = "Free";
+  let selectedPlan = "Free";
+
+  function normalizePlan(plan) {
+    return plan === "Premium" || plan === "Ultra Max Pro+" || plan === "Free" ? plan : "Free";
+  }
+
+  function isPaidPlan(plan) {
+    return normalizePlan(plan) !== "Free";
+  }
+
   function readState() {
     try {
       const raw = JSON.parse(localStorage.getItem(STORE) || "{}");
@@ -49,26 +61,12 @@
     }
   }
 
-  // Plan selection is intentionally session-only. A page refresh always starts
-  // on Free, and no plan/premium flag is written to localStorage.
-  let sessionPlan = "Free";
-  let selectedPlan = "Free";
-  let state = readState();
-
-  function normalizePlan(plan) {
-    return plan === "Premium" || plan === "Ultra Max Pro+" || plan === "Free" ? plan : "Free";
-  }
-
-  function isPaidPlan(plan) {
-    return normalizePlan(plan) !== "Free";
-  }
-
-  // The Command Center has one customer-facing paid label: Premium.
-  // Ultra Max Pro+ is an internal billing selection only; both paid plans
-  // persist locally and display as Premium after a page refresh.
+  // The dashboard shows the exact active plan.
   function displayPlan(plan) {
-    return isPaidPlan(plan) ? "Premium" : "Free";
+    return normalizePlan(plan);
   }
+
+  let state = readState();
 
   // A new page load always begins on Free, regardless of the previous session.
   sessionPlan = "Free";
@@ -250,69 +248,83 @@
 
   function choosePlan() {
     state = readState();
-    const current = sessionPlan;
+    selectedPlan = sessionPlan;
+
+    const priceFor = plan => plan === "Premium" ? 999 : plan === "Ultra Max Pro+" ? 49999 : 0;
 
     openModal(
       "Choose your plan",
-      "<b>Current status:</b> " + current +
-      "<br><br><span class=\"plan-modal-status\">This browser will remember your selection after refresh.</span>",
-      '<div class="modal-actions" style="display:grid;gap:9px">' +
+      "<b>Step 1 · Select a plan</b><br><br>" +
+      "Your active plan is <b>" + escapeHtml(sessionPlan) + "</b>.<br>" +
+      "<span class=\"plan-modal-status\">Nothing changes until you confirm the purchase. Refreshing this page returns the workspace to Free.</span>",
+      '<div style="display:grid;gap:9px">' +
         '<button class="secondary" id="planFree">Free · ₹0/month</button>' +
         '<button class="primary" id="planPremium">Premium · ₹999/month</button>' +
         '<button class="primary" id="planUltra">Ultra Max Pro+ · ₹49,999/month</button>' +
+        '<div id="planReview" style="margin-top:4px"></div>' +
       "</div>"
     );
 
-    const selectPlan = (plan) => {
+    const renderReview = () => {
+      const price = priceFor(selectedPlan);
+      const same = selectedPlan === sessionPlan;
+      const review = $("#planReview");
+      if (!review) return;
+
+      review.innerHTML =
+        '<div style="margin-top:8px;padding:12px;border:1px solid #ddd;border-radius:10px;background:rgba(0,0,0,.025)">' +
+          '<b>Step 2 · Review</b><br>' +
+          'Selected plan: <b>' + escapeHtml(selectedPlan) + '</b><br>' +
+          'Price: <b>₹' + price.toLocaleString("en-IN") + (selectedPlan === "Free" ? "" : "/month") + '</b>' +
+          (same ? '<br><small>This is already the active plan for this session.</small>' : '') +
+          '<button id="planConfirm" class="primary" type="button" style="width:100%;margin-top:10px">' +
+            (same ? "Keep " + escapeHtml(selectedPlan) : selectedPlan === "Free" ? "Confirm Free Plan" : "Confirm Purchase") +
+          '</button>' +
+        '</div>';
+
+      $("#planConfirm").onclick = () => {
+        if (selectedPlan === sessionPlan) {
+          closeModal();
+          toast(selectedPlan + " is already active.");
+          return;
+        }
+
+        const previousPlan = sessionPlan;
+        sessionPlan = selectedPlan;
+        state = readState();
+        state.plan = sessionPlan;
+        state.premium = isPaidPlan(sessionPlan);
+
+        // Account value is a demo metric. Count only a new paid-plan activation,
+        // never repeated clicks on an already-active plan.
+        if (isPaidPlan(sessionPlan) && previousPlan !== sessionPlan) {
+          state.accountValue = Number(state.accountValue || 0) + priceFor(sessionPlan);
+        }
+
+        writeState(state);
+        record(sessionPlan === "Free" ? "Selected Free plan" : "Purchased " + sessionPlan + " plan");
+        closeModal();
+        toast(sessionPlan === "Free"
+          ? "Free plan is active."
+          : "Purchase confirmed. " + sessionPlan + " is active.");
+        if (isPaidPlan(sessionPlan)) confetti();
+      };
+    };
+
+    const selectPlan = plan => {
       selectedPlan = plan;
-      $("#planFree, #planPremium, #planUltra").forEach(button => {
-        button.classList.toggle("is-selected", button.id === (
-          plan === "Free" ? "planFree" : plan === "Premium" ? "planPremium" : "planUltra"
-        ));
+      $$("#planFree, #planPremium, #planUltra").forEach(button => {
+        const id = plan === "Free" ? "planFree" : plan === "Premium" ? "planPremium" : "planUltra";
+        button.classList.toggle("is-selected", button.id === id);
       });
-      const purchase = $("#planPurchase");
-      if (purchase) {
-        purchase.textContent = plan === "Free" ? "Continue with Free" : "Purchase " + plan;
-        purchase.disabled = false;
-      }
+      renderReview();
     };
 
     $("#planFree").onclick = () => selectPlan("Free");
     $("#planPremium").onclick = () => selectPlan("Premium");
     $("#planUltra").onclick = () => selectPlan("Ultra Max Pro+");
 
-    const purchase = document.createElement("button");
-    purchase.id = "planPurchase";
-    purchase.className = "primary";
-    purchase.type = "button";
-    purchase.textContent = "Continue with Free";
-    purchase.style.cssText = "width:100%;margin-top:9px";
-    $("#planUltra")?.parentElement?.appendChild(purchase);
-
-    purchase.onclick = () => {
-      if (selectedPlan === "Free") {
-        sessionPlan = "Free";
-        state = readState();
-        state.plan = "Free";
-        state.premium = false;
-        renderState();
-        closeModal();
-        toast("Free plan is active.");
-        return;
-      }
-
-      sessionPlan = selectedPlan;
-      state = readState();
-      state.plan = sessionPlan;
-      state.premium = true;
-      const price = sessionPlan === "Premium" ? 999 : 49999;
-      state.accountValue = Number(state.accountValue || 0) + price;
-      writeState(state);
-      record("Purchased " + sessionPlan + " plan");
-      closeModal();
-      toast("Purchase complete. " + sessionPlan + " is active.");
-      confetti();
-    };
+    selectPlan(selectedPlan);
   }
 
   function startWorkspace() {
@@ -717,7 +729,9 @@
     $("#resetConfirm").onclick = () => {
       localStorage.removeItem(STORE);
       localStorage.removeItem(SESSION);
-      state = { ...defaults };
+      sessionPlan = "Free";
+      selectedPlan = "Free";
+      state = { ...defaults, plan: "Free", premium: false };
       writeState(state);
       renderState();
       closeModal();
@@ -998,7 +1012,7 @@ function bindActions() {
       window.location.reload();
     });
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./sw.js?v=46", { updateViaCache: "none" }).catch(() => {});
+      navigator.serviceWorker.register("./sw.js?v=47", { updateViaCache: "none" }).catch(() => {});
     });
   }
 
