@@ -80,6 +80,26 @@
     renderState();
   }
 
+  function syncPlanUI() {
+    const paid = isPaidPlan(state.plan);
+    const headerUpgrade = $("#headerUpgrade");
+    if (headerUpgrade) {
+      headerUpgrade.textContent = paid ? "Premium Active" : "Get Premium";
+      headerUpgrade.classList.toggle("is-active", paid);
+      headerUpgrade.setAttribute("aria-label", paid ? "Premium is active" : "Get Premium");
+    }
+
+    $("[data-plan-status]").forEach(el => {
+      el.textContent = paid ? "Premium" : "Free";
+      el.classList.toggle("is-active", paid);
+    });
+
+    const premiumButton = $("#planPremium");
+    const ultraButton = $("#planUltra");
+    if (premiumButton) premiumButton.textContent = state.plan === "Premium" ? "Premium · Active" : "Premium · ₹999/month";
+    if (ultraButton) ultraButton.textContent = state.plan === "Ultra Max Pro+" ? "Ultra Max Pro+ · Active" : "Ultra Max Pro+ · ₹49,999/month";
+  }
+
   function renderState() {
     state = readState();
     state.premium = isPaidPlan(state.plan);
@@ -148,6 +168,7 @@
 
     const status = $("#srStatus");
     if (status) status.textContent = state.premium ? "Premium is active." : "Free plan is active.";
+    syncPlanUI();
   }
 
   function confetti() {
@@ -192,7 +213,7 @@
     openModal(
       "Choose your plan",
       "<b>Current status:</b> " + current +
-      "<br><br>Choose a plan to activate on this browser.",
+      "<br><br><span class=\"plan-modal-status\">This browser will remember your selection after refresh.</span>",
       '<div class="modal-actions" style="display:grid;gap:9px">' +
         '<button class="secondary" id="planFree">Free · ₹0/month</button>' +
         '<button class="primary" id="planPremium">Premium · ₹999/month</button>' +
