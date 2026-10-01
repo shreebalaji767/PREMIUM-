@@ -707,7 +707,46 @@
   // V20 click engine: direct listeners + delegated fallback.
   // Direct listeners are intentionally attached to every control so a browser
   // or nested SVG/text target cannot prevent an action from firing.
-  function bindActions() {
+  
+// V22 — high-feedback interactions for primary header controls.
+function premiumActionFeedback(kind) {
+  const states = {
+    search: ["SEARCH INDEX", "Indexing workspace…", "18,402 records checked"],
+    notifications: ["NOTIFICATIONS", "Synchronizing activity…", "3 new events detected"],
+    login: ["SECURE SIGN-IN", "Opening secure session…", "Session handshake complete"],
+    theme: ["APPEARANCE", "Recalibrating interface…", "Display preferences applied"],
+    upgrade: ["PREMIUM ACCESS", "Preparing upgrade flow…", "Plan comparison unlocked"],
+    mobileMenu: ["NAVIGATION", "Rebuilding workspace navigation…", "Navigation ready"]
+  };
+  const s = states[kind];
+  if (!s) return;
+  const title = s[0], step = s[1], done = s[2];
+  showModal(title, `
+    <div class="receipt">
+      <b>${title}</b><br>
+      STATUS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PROCESSING<br>
+      REQUEST&nbsp;&nbsp;&nbsp;LOCAL WORKSPACE<br>
+      <span id="premiumProgressText">${step}</span><br>
+      NODE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PREM-${Math.floor(1000 + Math.random()*8999)}
+    </div>
+    <div class="chaos">System response: ${step} <span aria-hidden="true">▰▰▰</span></div>
+  `, [{
+    label: "Continue",
+    action: () => {
+      showModal(title, `
+        <div class="receipt">
+          <b>✓ ${done}</b><br>
+          REQUEST ID&nbsp;PRM-${Date.now().toString().slice(-8)}<br>
+          LATENCY&nbsp;&nbsp;&nbsp;&nbsp;0.${Math.floor(100+Math.random()*899)}s<br>
+          STATE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;READY
+        </div>
+        <div class="chaos">Workspace services are responding normally. Your request has been queued locally.</div>
+      `);
+    }
+  }]);
+}
+
+function bindActions() {
     $("[data-action]").forEach(button => {
       if (button.dataset.boundPremium === "1") return;
       button.dataset.boundPremium = "1";
