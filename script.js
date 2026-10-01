@@ -573,13 +573,31 @@
     toast(next === "dark" ? "Dark mode enabled." : "Light mode enabled.");
   }
 
-  function install() {
-    if (window.__deferredPrompt) {
-      const prompt = window.__deferredPrompt;
-      prompt.prompt();
-      prompt.userChoice.finally(() => { window.__deferredPrompt = null; });
+  async function install() {
+    const prompt = window.__deferredPrompt;
+    if (prompt && !window.__installPromptInFlight) {
+      window.__installPromptInFlight = true;
+      try {
+        const result = await prompt.prompt();
+        const outcome = result?.outcome || "dismissed";
+        window.__deferredPrompt = null;
+        updatePwaInstallButton();
+        if (outcome === "accepted") {
+          record("Installed Premium");
+          toast("Premium is installed.");
+        } else {
+          toast("Install prompt dismissed.");
+        }
+      } catch {
+        window.__deferredPrompt = null;
+        updatePwaInstallButton();
+        toast("Install prompt is no longer available.");
+      } finally {
+        window.__installPromptInFlight = false;
+      }
       return;
     }
+
     const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.navigator.standalone;
     openModal(
       "Install Premium",
@@ -916,13 +934,10 @@ function bindActions() {
   }
 
   window.addEventListener("beforeinstallprompt", event => {
+    // Keep the native install event only long enough to trigger it from our
+    // explicit install button. prompt() is called from the user's click handler.
     event.preventDefault();
     window.__deferredPrompt = event;
-    updatePwaInstallButton();
-  });
-
-  window.addEventListener("appinstalled", () => {
-    window.__deferredPrompt = null;
     updatePwaInstallButton();
   });
 
@@ -932,8 +947,6 @@ function bindActions() {
   window.addEventListener("appinstalled", () => {
     window.__deferredPrompt = null;
     updatePwaInstallButton();
-    record("Installed Premium");
-    toast("Premium is installed.");
   });
 
   window.addEventListener("online", () => $("#offlineBar")?.classList.remove("show"));
