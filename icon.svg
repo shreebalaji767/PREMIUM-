@@ -1,1 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="112" fill="#111318"/><path d="M148 104h115c72 0 116 36 116 94 0 35-17 61-47 76 40 13 63 42 63 82 0 64-47 106-128 106H148V104zm72 58v87h40c31 0 48-16 48-44 0-28-17-43-48-43h-40zm0 145v98h48c37 0 56-17 56-49s-19-49-56-49h-48z" fill="#fff"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<defs>
+ <linearGradient id="bg" x1="72" y1="56" x2="440" y2="456" gradientUnits="userSpaceOnUse"><stop stop-color="#17191f"/><stop offset=".58" stop-color="#0d0f14"/><stop offset="1" stop-color="#272b35"/></linearGradient>
+ <linearGradient id="metal" x1="146" y1="116" x2="378" y2="394" gradientUnits="userSpaceOnUse"><stop stop-color="#fff7d6"/><stop offset=".25" stop-color="#e9c86b"/><stop offset=".58" stop-color="#fff0a8"/><stop offset="1" stop-color="#b8892f"/></linearGradient>
+ <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#000" flood-opacity=".32"/></filter>
+</defs>
+<rect width="512" height="512" rx="118" fill="url(#bg)"/>
+<rect x="17" y="17" width="478" height="478" rx="102" fill="none" stroke="#ffffff" stroke-opacity=".08" stroke-width="2"/>
+<path d="M148 392V120h116c70 0 111 35 111 91 0 37-18 64-50 78l61 103h-82l-48-86h-30v86h-78Zm78-154h35c31 0 45-10 45-28 0-19-14-29-45-29h-35v57Z" fill="url(#metal)" filter="url(#shadow)"/>
+<path d="M148 120h116c70 0 111 35 111 91" fill="none" stroke="#fff" stroke-opacity=".24" stroke-width="5" stroke-linecap="round"/>
+<circle cx="374" cy="124" r="9" fill="#fff3b0"/>
+</svg>
