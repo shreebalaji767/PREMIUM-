@@ -28,3 +28,6 @@ body[data-theme="dark"] .v11-utility span+span{border-color:#2b303b}
 body[data-theme="dark"] .v11-shortcuts kbd{background:#171a21;border-color:#303641}
 @media(max-width:640px){.v11-utility{left:12px;bottom:12px}.v11-utility span:nth-child(2){display:none}}
 @media(prefers-reduced-motion:reduce){.v11-utility{transition:none}}
+
+/* Premium identity mark */
+.brand-mark{background:linear-gradient(145deg,#17191f,#0d0f14);border:1px solid rgba(233,200,107,.22);box-shadow:0 9px 24px rgba(17,19,24,.2),inset 0 1px rgba(255,255,255,.14)}.brand-mark svg{width:23px;height:23px}.brand:hover .brand-mark{transform:translateY(-2px);box-shadow:0 12px 28px rgba(17,19,24,.25),0 0 0 3px rgba(233,200,107,.07),inset 0 1px rgba(255,255,255,.18)}
