@@ -167,7 +167,7 @@ const originalUpgrade=window.upgrade;if(typeof originalUpgrade==="function"){win
   window.handleAction=function(type){
     if(type==="billing"||type==="history"||type==="account"){accountOps(type);return}
     if(type==="audit"||type==="security"){action(type);return}
-    if(type==="preferences"||type==="theme"||type==="install"||type==="upgrade"){action(type);return}
+    if(type==="preferences"||type==="theme"||type==="install"||type==="upgrade"){const b=document.querySelector(`[data-action="${type}"]`);if(b)b.click();return}
     if(type==="usage"){showUsage();return}
     if(type==="release"){showRelease();return}
   };
