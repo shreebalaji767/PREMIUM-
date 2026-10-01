@@ -43,8 +43,12 @@
 
   let state = readState();
 
+  function normalizePlan(plan) {
+    return plan === "Premium" || plan === "Ultra Max Pro+" || plan === "Free" ? plan : "Free";
+  }
+
   function isPaidPlan(plan) {
-    return plan === "Premium" || plan === "Ultra Max Pro+";
+    return normalizePlan(plan) !== "Free";
   }
 
   // The Command Center has one customer-facing paid label: Premium.
@@ -86,6 +90,7 @@
   }
 
   function syncPlanUI() {
+    state.plan = normalizePlan(state.plan);
     const paid = isPaidPlan(state.plan);
     const headerUpgrade = $("#headerUpgrade");
     if (headerUpgrade) {
@@ -951,7 +956,7 @@ function bindActions() {
       window.location.reload();
     });
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./sw.js?v=43", { updateViaCache: "none" }).catch(() => {});
+      navigator.serviceWorker.register("./sw.js?v=44", { updateViaCache: "none" }).catch(() => {});
     });
   }
 
