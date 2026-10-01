@@ -1164,3 +1164,51 @@ body[data-theme="dark"] .cc-metric:hover{box-shadow:0 16px 34px rgba(0,0,0,.25)}
   .command-center .live i,.command-center .command-strip::after,.momentum i{animation:none}
   .cc-action,.cc-metric{transition:none}
 }
+
+/* V35 — active plan status polish */
+#headerUpgrade.is-active{
+  position:relative;
+  background:linear-gradient(135deg,#5f5ac7,#7d75e8);
+  border-color:transparent;
+  color:#fff;
+  box-shadow:0 9px 24px rgba(95,90,199,.22);
+}
+#headerUpgrade.is-active::before{
+  content:"";
+  width:6px;height:6px;
+  margin-right:7px;
+  border-radius:50%;
+  background:#7ff0bd;
+  box-shadow:0 0 0 4px rgba(127,240,189,.12),0 0 10px rgba(127,240,189,.45);
+}
+.plan-name .plan-live{
+  display:inline-flex;
+  align-items:center;
+  margin-left:7px;
+  padding:3px 6px;
+  border-radius:999px;
+  vertical-align:middle;
+  font-size:7px;
+  font-weight:900;
+  letter-spacing:.08em;
+  color:var(--muted,#68707d);
+  background:var(--surface-2,#f7f8fb);
+  border:1px solid var(--line,#e6e8ec);
+}
+.plan-name .plan-live.is-active{
+  color:#18845d;
+  background:rgba(32,181,122,.08);
+  border-color:rgba(32,181,122,.18);
+}
+.plan-modal-status{
+  display:inline-block;
+  padding:8px 10px;
+  border-radius:9px;
+  background:var(--surface-2,#f7f8fb);
+  color:var(--muted,#68707d);
+  font-size:11px;
+}
+body[data-theme="dark"] #headerUpgrade.is-active{box-shadow:0 10px 28px rgba(0,0,0,.3)}
+body[data-theme="dark"] .plan-name .plan-live{background:#1b2028;border-color:#343b46;color:#aeb5c1}
+body[data-theme="dark"] .plan-name .plan-live.is-active{color:#6ee5ae;background:rgba(32,181,122,.1);border-color:rgba(32,181,122,.22)}
+body[data-theme="dark"] .plan-modal-status{background:#1b2028;color:#aeb5c1}
