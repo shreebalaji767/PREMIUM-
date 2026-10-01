@@ -154,10 +154,14 @@
     const identity = $("#accountIdentity");
     const notifyDot = $("#notifyDot");
 
-    if (accountValue) accountValue.textContent = "₹" + Number(sessionPurchaseValue || 0).toLocaleString("en-IN");
+    // Account value is strictly tied to the currently active paid plan.
+    // Free always displays ₹0, including after a fresh page load.
+    const activeValue = sessionPlan === "Premium" ? 999 : sessionPlan === "Ultra Max Pro+" ? 49999 : 0;
+    sessionPurchaseValue = activeValue;
+    if (accountValue) accountValue.textContent = "₹" + activeValue.toLocaleString("en-IN");
     if (premiumStatus) premiumStatus.textContent = displayPlan(sessionPlan);
     if (billingState) billingState.textContent = "Current plan: " + sessionPlan;
-    if (balanceValue) balanceValue.textContent = "₹" + Number(sessionPurchaseValue || 0).toLocaleString("en-IN");
+    if (balanceValue) balanceValue.textContent = "₹" + activeValue.toLocaleString("en-IN");
     if (eventCount) eventCount.textContent = state.events.length + " events";
     if (invoiceCount) invoiceCount.textContent = Math.max(1, Math.min(12, Math.ceil(state.events.length / 3)));
     if (identity) {
