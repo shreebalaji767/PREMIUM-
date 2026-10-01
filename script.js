@@ -37,8 +37,13 @@
   }
 
   let state = readState();
+
+  function isPaidPlan(plan) {
+    return plan === "Premium" || plan === "Ultra Max Pro+";
+  }
+
   state.visits = Number(state.visits || 0) + 1;
-  state.premium = state.plan === "Premium" || state.plan === "Ultra Max Pro+";
+  state.premium = isPaidPlan(state.plan);
   writeState(state);
 
   function escapeHtml(value) {
@@ -70,7 +75,7 @@
 
   function renderState() {
     state = readState();
-    state.premium = state.plan === "Premium" || state.plan === "Ultra Max Pro+";
+    state.premium = isPaidPlan(state.plan);
     writeState(state);
 
     const accountValue = $("#accountValue");
@@ -89,7 +94,9 @@
     const notifyDot = $("#notifyDot");
 
     if (accountValue) accountValue.textContent = "₹" + Number(state.accountValue || 0).toLocaleString("en-IN");
-    if (premiumStatus) premiumStatus.textContent = state.premium ? "Premium" : "Free";
+    // Command Center intentionally shows the product tier, not the billing SKU:
+    // Premium and Ultra Max Pro+ purchases both display simply as "Premium".
+    if (premiumStatus) premiumStatus.textContent = isPaidPlan(state.plan) ? "Premium" : "Free";
     if (billingState) billingState.textContent = "Current plan: " + state.plan;
     if (balanceValue) balanceValue.textContent = "₹" + Number(state.accountValue || 0).toLocaleString("en-IN");
     if (eventCount) eventCount.textContent = state.events.length + " events";
@@ -186,7 +193,7 @@
     $("#planFree").onclick = () => {
       state = readState();
       state.plan = "Free";
-      state.premium = false;
+      state.premium = isPaidPlan(state.plan);
       writeState(state);
       record("Selected Free plan");
       closeModal();
