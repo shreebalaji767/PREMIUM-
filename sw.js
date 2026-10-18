@@ -1,5 +1,5 @@
-const CACHE="premium-v51";
-const CORE=["./","./index.html","./style.css?v=51","./script.js?v=51","./upgrade.js?v=51","./manifest.webmanifest?v=51","./icon.svg?v=51"];
+const CACHE="premium-v52";
+const CORE=["./","./index.html","./style.css?v=52","./script.js?v=52","./upgrade.js?v=52","./manifest.webmanifest?v=52","./icon.svg?v=52"];
 self.addEventListener("install",event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(CORE)).then(()=>self.skipWaiting())));
 self.addEventListener("activate",event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
 self.addEventListener("message",event=>{if(event.data==="SKIP_WAITING")self.skipWaiting()});
