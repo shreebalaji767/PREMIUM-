@@ -2,6 +2,10 @@
 
 ### A polished, static SaaS-style workspace demo.
 
+> **IMPORTANT: THIS IS A FRONT-END DEMO, NOT A REAL PAYMENT GATEWAY.**
+> The “Purchase” / “Place demo order” flow only simulates buying Premium for demonstration purposes. No money is charged, no card/payment details are processed, and no real subscription or payment transaction is created. A “Purchased” or “Order complete” screen is a visual demo confirmation only.
+
+
 PREMIUM™ is a responsive, installable front-end experience built with HTML, CSS, and vanilla JavaScript. It includes dashboard surfaces, a simulated checkout, account and billing interactions, accessibility controls, and a playful Reality Lab.
 
 ## Current release
@@ -20,7 +24,9 @@ PREMIUM™ is a responsive, installable front-end experience built with HTML, CS
 - All workspace activity, preferences, account details, and selected plans live only in JavaScript memory and are lost on reload
 - The service worker may cache static application files for PWA/offline loading; it does not persist workspace or purchase state
 
-## Important checkout note
+## Payment and purchase disclaimer
+
+**This repository does not implement or connect to a real payment gateway.** The checkout UI is intentionally designed to feel like a premium purchase for demo/testing purposes only. Clicking the purchase button activates a temporary Premium state in the currently open page; it does not mean that a real payment succeeded.
 
 Checkout is a **demo only**. It does not charge money, validate a real payment, or create a real subscription. A displayed receipt is illustrative and does not prove a real purchase. The plan is held in memory only, so it cannot persist across a refresh or browser restart.
 
