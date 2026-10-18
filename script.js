@@ -128,11 +128,11 @@
     document.body.classList.toggle("has-paid-plan", paid);
     document.body.classList.toggle("promotions-muted", promosMuted);
     document.body.classList.toggle("quiet-workspace", quietMode);
-    $("[data-action=\"upgrade\"]").forEach(el => { el.hidden = promosMuted; });
+    $$("[data-action=\"upgrade\"]").forEach(el => { el.hidden = promosMuted; });
     const pricingNav = $('#mainNav a[href="#pricing"]');
     if (pricingNav) pricingNav.hidden = promosMuted;
 
-    $("[data-plan-status]").forEach(el => {
+    $$("[data-plan-status]").forEach(el => {
       const plan = el.dataset.plan || "";
       const current = plan === sessionPlan;
       el.textContent = current ? "Current" : (plan === "Free" ? "Free" : plan);
