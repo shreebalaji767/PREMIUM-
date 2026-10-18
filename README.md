@@ -7,7 +7,7 @@ The interface stays professional. The workspace state has considerably more pers
 
 ## Current release
 
-**V51 — Checkout Experience release**
+**V52 — Checkout Experience release**
 
 - Installable Progressive Web App
 - Offline application shell with service-worker caching
@@ -19,6 +19,8 @@ The interface stays professional. The workspace state has considerably more pers
 - Account, billing, operations, security, support, and workspace intelligence surfaces
 - Workspace export and local reset controls<br>- Live workspace telemetry, keyboard workflow helpers, notification state, and update detection<br>- Reality Lab with reversible visual modes, a focus bubble, absurd fortunes, and rubber-duck debugging tips
 - Three-stage animated demo checkout with plan selection, order summary, DEMO10 promo interaction, processing feedback, and a receipt screen
+- Purchase-respecting UI: after a paid demo checkout, Premium upsells and promotional sections stay hidden across reloads in that browser
+- No ad network or purchase-based ad targeting; the stored plan is used only to suppress upgrade promotions
 - Explicit no-payment messaging; no real payment gateway, card collection, or backend processing
 - Keyboard-operable experiments with reduced-motion support
 - Versioned static assets and refreshed offline cache
@@ -84,7 +86,11 @@ PREMIUM-/
 
 Enable **Settings → Pages → Deploy from branch → main → / (root)**.
 
-## V51 additions
+## V52 additions
+
+- Persisted the locally selected demo plan in browser storage so the post-purchase experience survives refreshes
+- Suppressed upgrade buttons, pricing promotions, Premium feature marketing, and the final sales CTA after a paid demo purchase
+- No ad network, ad profiling, or purchase-based ad targeting; Reset workspace clears the local purchase state
 
 - Added a self-contained Reality Lab panel without replacing existing workspace routes
 - Added non-repeating absurd fortunes and debugging tips per browser session
@@ -104,7 +110,7 @@ Enable **Settings → Pages → Deploy from branch → main → / (root)**.
 ## Status
 
 **Production status:** Operational  
-**Release:** V51  
+**Release:** V52  
 **Backend:** None  
 **Database:** None  
 **Payment processor:** None  
