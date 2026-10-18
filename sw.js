@@ -1,4 +1,4 @@
-const CACHE="premium-v54";
+const CACHE="premium-v55";
 const CORE=["./","./index.html","./style.css?v=54","./script.js?v=54","./upgrade.js?v=54","./manifest.webmanifest?v=54","./icon.svg?v=54"];
 self.addEventListener("install",event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(CORE)).then(()=>self.skipWaiting())));
 self.addEventListener("activate",event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
