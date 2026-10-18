@@ -126,9 +126,9 @@
     const paid = isPaidPlan(sessionPlan);
     const headerUpgrade = $("#headerUpgrade");
     if (headerUpgrade) {
-      headerUpgrade.textContent = paid ? (sessionPlan + " Active") : "Get Premium";
+      headerUpgrade.textContent = paid ? (sessionPlan + " · Purchased ✓") : "Get Premium";
       headerUpgrade.classList.toggle("is-active", paid);
-      headerUpgrade.setAttribute("aria-label", paid ? (sessionPlan + " is active") : "Get Premium");
+      headerUpgrade.setAttribute("aria-label", paid ? (sessionPlan + " purchased in this demo and active until reload") : "Get Premium");
     }
     // No ad network is connected. Plan state only suppresses on-page upgrade marketing.
     const promosMuted = paid || volatileStorage.getItem(PROMO_PREF) === "1";
@@ -150,8 +150,8 @@
     const premiumButton = $("#planPremium");
     const ultraButton = $("#planUltra");
     const freeButton = $("#planFree");
-    if (premiumButton) premiumButton.textContent = sessionPlan === "Premium" ? "Premium · Selected" : "Premium · ₹999/month";
-    if (ultraButton) ultraButton.textContent = sessionPlan === "Ultra Max Pro+" ? "Ultra Max Pro+ · Selected" : "Ultra Max Pro+ · ₹49,999/month";
+    if (premiumButton) premiumButton.textContent = sessionPlan === "Premium" ? "✓ Premium · Purchased" : "Premium · ₹999/month";
+    if (ultraButton) ultraButton.textContent = sessionPlan === "Ultra Max Pro+" ? "✓ Ultra Max Pro+ · Purchased" : "Ultra Max Pro+ · ₹49,999/month";
     if (freeButton) freeButton.textContent = sessionPlan === "Free" ? "Free · Current" : "Stay Free";
   }
 
@@ -311,7 +311,7 @@
       const previous=sessionPlan, price=priceFor(selectedPlan);
       sessionPlan=selectedPlan;state=readState();state.plan=sessionPlan;state.premium=isPaidPlan(sessionPlan);
       if(isPaidPlan(sessionPlan)) { try { volatileStorage.setItem(PURCHASE, sessionPlan); } catch {} }
-      else { try { volatileStorage.removeItem(PURCHASE); volatileStorage.removeItem(PURCHASE); } catch {} }
+      else { try { volatileStorage.removeItem(PURCHASE); } catch {} }
       if(isPaidPlan(sessionPlan)&&previous!==sessionPlan)sessionPurchaseValue+=price;
       writeState(state);record(sessionPlan==="Free"?"Selected Free plan":"Purchased "+sessionPlan+" plan (demo)");
       if(!isPaidPlan(sessionPlan)){closeModal();toast("Free plan is active.");return;}
