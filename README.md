@@ -7,7 +7,7 @@ The interface stays professional. The workspace state has considerably more pers
 
 ## Current release
 
-**V53 — Purchase-respecting experience**
+**V54 — Purchase-respecting experience**
 
 - Installable Progressive Web App
 - Offline application shell with service-worker caching
@@ -21,7 +21,7 @@ The interface stays professional. The workspace state has considerably more pers
 - Three-stage animated demo checkout with plan selection, order summary, DEMO10 promo interaction, processing feedback, and a receipt screen
 - Purchase-respecting UI: after a paid demo checkout, Premium upsells and promotional sections stay hidden across reloads in that browser
 - Preference center with persistent quiet workspace mode and user-controlled upgrade-promotion visibility
-- Paid demo plans automatically suppress upgrade marketing across reloads; no ad network or purchase-based ad targeting
+- Demo paid plans last only for the current browsing session; reopening the site starts on Free, and no ad network or purchase-based ad targeting is used
 - Explicit no-payment messaging; no real payment gateway, card collection, or backend processing
 - Keyboard-operable experiments with reduced-motion support
 - Versioned static assets and refreshed offline cache
@@ -87,9 +87,9 @@ PREMIUM-/
 
 Enable **Settings → Pages → Deploy from branch → main → / (root)**.
 
-## V53 additions
+## V54 additions
 
-- Persisted the locally selected demo plan in browser storage so the post-purchase experience survives refreshes
+- Kept the selected demo plan in session storage: refreshes in the same tab retain it, while a new browsing session starts on Free
 - Added Experience Controls for appearance, reduced motion, quiet workspace, and upgrade-promotion visibility
 - Quiet workspace hides the announcement bar and live ticker; settings persist locally
 - Suppressed upgrade buttons, pricing promotions, Premium feature marketing, and the final sales CTA after a paid demo purchase
@@ -113,7 +113,7 @@ Enable **Settings → Pages → Deploy from branch → main → / (root)**.
 ## Status
 
 **Production status:** Operational  
-**Release:** V53  
+**Release:** V54  
 **Backend:** None  
 **Database:** None  
 **Payment processor:** None  
