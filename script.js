@@ -261,84 +261,41 @@
   }
 
   function choosePlan() {
-    state = readState();
     selectedPlan = sessionPlan;
-
-    const priceFor = plan => plan === "Premium" ? 999 : plan === "Ultra Max Pro+" ? 49999 : 0;
-
-    openModal(
-      "Choose your plan",
-      "<b>Step 1 · Select a plan</b><br><br>" +
-      "Your active plan is <b>" + escapeHtml(sessionPlan) + "</b>.<br>" +
-      "<span class=\"plan-modal-status\">Nothing changes until you confirm the purchase. Refreshing this page returns the workspace to Free.</span>",
-      '<div style="display:grid;gap:9px">' +
-        '<button class="secondary" id="planFree">Free · ₹0/month</button>' +
-        '<button class="primary" id="planPremium">Premium · ₹999/month</button>' +
-        '<button class="primary" id="planUltra">Ultra Max Pro+ · ₹49,999/month</button>' +
-        '<div id="planReview" style="margin-top:4px"></div>' +
-      "</div>"
-    );
-
-    const renderReview = () => {
-      const price = priceFor(selectedPlan);
-      const same = selectedPlan === sessionPlan;
-      const review = $("#planReview");
-      if (!review) return;
-
-      review.innerHTML =
-        '<div style="margin-top:8px;padding:12px;border:1px solid #ddd;border-radius:10px;background:rgba(0,0,0,.025)">' +
-          '<b>Step 2 · Review</b><br>' +
-          'Selected plan: <b>' + escapeHtml(selectedPlan) + '</b><br>' +
-          'Price: <b>₹' + price.toLocaleString("en-IN") + (selectedPlan === "Free" ? "" : "/month") + '</b>' +
-          (same ? '<br><small>This is already the active plan for this session.</small>' : '') +
-          '<button id="planConfirm" class="primary" type="button" style="width:100%;margin-top:10px">' +
-            (same ? "Keep " + escapeHtml(selectedPlan) : selectedPlan === "Free" ? "Confirm Free Plan" : "Confirm Purchase") +
-          '</button>' +
-        '</div>';
-
-      $("#planConfirm").onclick = () => {
-        if (selectedPlan === sessionPlan) {
-          closeModal();
-          toast(selectedPlan + " is already active.");
-          return;
-        }
-
-        const previousPlan = sessionPlan;
-        sessionPlan = selectedPlan;
-        state = readState();
-        state.plan = sessionPlan;
-        state.premium = isPaidPlan(sessionPlan);
-
-        // Account value is a demo metric. Count only a new paid-plan activation,
-        // never repeated clicks on an already-active plan.
-        if (isPaidPlan(sessionPlan) && previousPlan !== sessionPlan) {
-          sessionPurchaseValue += priceFor(sessionPlan);
-        }
-
-        writeState(state);
-        record(sessionPlan === "Free" ? "Selected Free plan" : "Purchased " + sessionPlan + " plan");
-        closeModal();
-        toast(sessionPlan === "Free"
-          ? "Free plan is active."
-          : "Purchase confirmed. " + sessionPlan + " is active.");
-        if (isPaidPlan(sessionPlan)) confetti();
+    const priceFor = p => p === "Premium" ? 999 : p === "Ultra Max Pro+" ? 49999 : 0;
+    const money = n => "₹" + Math.round(n).toLocaleString("en-IN");
+    let coupon = false, receiptEmail = "";
+    const card = (p,desc,perks) => '<button type="button" class="checkout-plan '+(selectedPlan===p?'is-selected':'')+'" data-pick="'+escapeHtml(p)+'" aria-pressed="'+(selectedPlan===p)+'"><span class="checkout-plan-top"><b>'+escapeHtml(p)+'</b><span class="checkout-radio"></span></span><strong>'+money(priceFor(p))+'<small>'+(priceFor(p)?' / month':' forever')+'</small></strong><span class="checkout-plan-desc">'+desc+'</span><span class="checkout-perks">'+perks+'</span></button>';
+    function chooseView(){
+      openModal("Your upgrade starts here",'<div class="checkout-shell"><div class="checkout-progress"><span class="is-current"><i>1</i> Choose</span><span><i>2</i> Checkout</span><span><i>3</i> Receipt</span></div><div class="checkout-trust"><span>✦ CURATED FOR YOUR WORKFLOW</span><span>LOCAL DEMO · NO CHARGE</span></div><h3 class="checkout-title">Pick your power level.</h3><p class="checkout-subtitle">A premium purchase experience, without the real-world payment.</p><div class="checkout-plans">'+card("Free","The essentials, no commitment.","✓ Core workspace")+card("Premium","More room to do your best work.","✓ AI tools · Priority support")+card("Ultra Max Pro+","A comically powerful control room.","✓ Advanced controls · Dedicated support")+'</div><div class="checkout-reassurance"><span>⌑</span><div><b>Transparent checkout</b><small>No card details are collected. Nothing is charged.</small></div></div><div class="checkout-sticky-total"><div><small>YOUR SELECTION</small><b>'+escapeHtml(selectedPlan)+'</b></div><div class="checkout-total"><b>'+money(priceFor(selectedPlan))+'</b><small>'+(priceFor(selectedPlan)?"monthly demo price":"no recurring charge")+'</small></div></div><button type="button" class="checkout-continue" id="checkoutContinue">'+(selectedPlan===sessionPlan?'Review current plan':selectedPlan==="Free"?'Continue with Free':'Continue to secure checkout')+' <span>→</span></button><p class="checkout-fineprint">Demo purchase only · No payment processor connected</p></div>',"");
+      $("#modalContent").querySelectorAll("[data-pick]").forEach(x=>x.onclick=()=>{selectedPlan=x.dataset.pick;chooseView()});
+      $("#checkoutContinue").onclick=()=>{if(selectedPlan===sessionPlan){closeModal();toast(selectedPlan+" is already active.");}else if(selectedPlan==="Free"){finish();}else checkoutView();};
+    }
+    function checkoutView(){
+      const price=priceFor(selectedPlan);
+      openModal("Secure checkout",'<div class="checkout-shell"><div class="checkout-progress"><span class="is-done"><i>✓</i> Choose</span><span class="is-current"><i>2</i> Checkout</span><span><i>3</i> Receipt</span></div><div class="checkout-secure"><span class="checkout-lock">♙</span><div><b>You’re in the secure zone</b><small>Simulated checkout. No real payment is taken.</small></div><span class="checkout-lock-label">DEMO</span></div><h3 class="checkout-title">One last tiny detail.</h3><p class="checkout-subtitle">Add a receipt email if you like, apply a demo code, then place your pretend order.</p><label class="checkout-label" for="checkoutEmail">Receipt email <span>optional</span></label><input class="checkout-input" id="checkoutEmail" type="email" placeholder="you@company.com" autocomplete="email"><label class="checkout-label">Payment method</label><div class="checkout-method"><span class="checkout-card-icon">▤</span><span><b>Demo card</b><small>Test ending in 4242 · no card details needed</small></span><span class="checkout-method-check">✓</span></div><label class="checkout-label" for="checkoutCoupon">Promo code <span>try DEMO10</span></label><div class="checkout-coupon"><input class="checkout-input" id="checkoutCoupon" placeholder="Enter a code"><button type="button" id="checkoutApplyCoupon">Apply</button></div><p id="checkoutCouponMessage" class="checkout-coupon-message" aria-live="polite">A little discount-shaped magic, perhaps?</p><div class="checkout-order"><div class="checkout-order-head"><b>Order summary</b><span>ORDER PREVIEW</span></div><div class="checkout-order-line"><span>'+escapeHtml(selectedPlan)+' subscription</span><b>'+money(price)+'</b></div><div class="checkout-order-line"><span>Taxes</span><b>₹0</b></div><div class="checkout-order-line checkout-discount" id="checkoutDiscountRow" style="display:none"><span>Demo discount (10%)</span><b>−'+money(price*.1)+'</b></div><div class="checkout-order-total"><span>Today’s demo total</span><b id="checkoutFinalTotal">'+money(price)+'</b></div><small>Monthly price is illustrative. No real charge.</small></div><button type="button" class="checkout-continue" id="checkoutPlaceOrder">Place demo order <span>↗</span></button><button type="button" class="checkout-back" id="checkoutBack">← Back to plans</button><p class="checkout-fineprint">🔒 Email stays in this browser session.</p></div>',"");
+      $("#checkoutApplyCoupon").onclick=()=>{coupon=($("#checkoutCoupon").value||"").trim().toUpperCase()==="DEMO10";$("#checkoutCouponMessage").textContent=coupon?"✓ DEMO10 applied — 10% off your demo total.":"That code didn’t work. Try DEMO10.";$("#checkoutCouponMessage").classList.toggle("is-success",coupon);$("#checkoutDiscountRow").style.display=coupon?"flex":"none";$("#checkoutFinalTotal").textContent=money(price*(coupon?.9:1));};
+      $("#checkoutBack").onclick=chooseView;
+      $("#checkoutPlaceOrder").onclick=()=>{
+        const input=$("#checkoutEmail");receiptEmail=(input.value||"").trim();
+        if(receiptEmail&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(receiptEmail)){input.setCustomValidity("Enter a valid email or leave this blank.");input.reportValidity();input.addEventListener("input",()=>input.setCustomValidity(""),{once:true});return;}
+        const button=$("#checkoutPlaceOrder");button.disabled=true;button.innerHTML='<span class="checkout-spinner"></span> Preparing your demo order…';
+        const messages=["Reserving your imaginary upgrade…","Polishing the digital paperwork…","Making it feel official…"];let i=0;
+        const note=document.createElement("p");note.className="checkout-processing-message";note.setAttribute("role","status");note.textContent=messages[0];button.insertAdjacentElement("afterend",note);
+        const tick=()=>{if(++i<messages.length){note.textContent=messages[i];setTimeout(tick,500);}else finish();};setTimeout(tick,500);
       };
-    };
-
-    const selectPlan = plan => {
-      selectedPlan = plan;
-      $$("#planFree, #planPremium, #planUltra").forEach(button => {
-        const id = plan === "Free" ? "planFree" : plan === "Premium" ? "planPremium" : "planUltra";
-        button.classList.toggle("is-selected", button.id === id);
-      });
-      renderReview();
-    };
-
-    $("#planFree").onclick = () => selectPlan("Free");
-    $("#planPremium").onclick = () => selectPlan("Premium");
-    $("#planUltra").onclick = () => selectPlan("Ultra Max Pro+");
-
-    selectPlan(selectedPlan);
+    }
+    function finish(){
+      const previous=sessionPlan, price=priceFor(selectedPlan);
+      sessionPlan=selectedPlan;state=readState();state.plan=sessionPlan;state.premium=isPaidPlan(sessionPlan);
+      if(isPaidPlan(sessionPlan)&&previous!==sessionPlan)sessionPurchaseValue+=price;
+      writeState(state);record(sessionPlan==="Free"?"Selected Free plan":"Purchased "+sessionPlan+" plan (demo)");
+      if(!isPaidPlan(sessionPlan)){closeModal();toast("Free plan is active.");return;}
+      const order="PR-"+Math.random().toString(36).slice(2,8).toUpperCase();
+      openModal("Order complete ✦",'<div class="checkout-shell checkout-receipt"><div class="checkout-progress"><span class="is-done"><i>✓</i> Choose</span><span class="is-done"><i>✓</i> Checkout</span><span class="is-current"><i>3</i> Receipt</span></div><div class="receipt-confetti" aria-hidden="true">✦ ✧ ✦</div><div class="receipt-stamp">DEMO ORDER · CONFIRMED</div><h3 class="checkout-title">A premium moment.</h3><p class="checkout-subtitle">Your imaginary order has landed. The upgrade is active for this page session.</p><div class="receipt-ticket"><div><small>ORDER REFERENCE</small><b>'+order+'</b></div><div><small>PLAN ACTIVATED</small><b>'+escapeHtml(sessionPlan)+'</b></div><div><small>DEMO TOTAL</small><b>'+money(price*(coupon?.9:1))+'</b></div>'+(receiptEmail?'<div><small>RECEIPT FOR</small><b>'+escapeHtml(receiptEmail)+'</b></div>':'')+'</div><div class="receipt-notice"><span>✓</span><p><b>No payment was processed.</b><br>This is a front-end demo with no payment gateway.</p></div><button type="button" class="checkout-continue" id="receiptDone">Enter your upgraded workspace <span>→</span></button></div>',"");
+      $("#receiptDone").onclick=()=>{closeModal();toast(sessionPlan+" demo plan is active.");jump("top");};confetti();
+    }
+    chooseView();
   }
 
   function startWorkspace() {
@@ -1027,7 +984,7 @@ function bindActions() {
       window.location.reload();
     });
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./sw.js?v=50", { updateViaCache: "none" }).catch(() => {});
+      navigator.serviceWorker.register("./sw.js?v=51", { updateViaCache: "none" }).catch(() => {});
     });
   }
 
