@@ -7,7 +7,7 @@ The interface stays professional. The workspace state has considerably more pers
 
 ## Current release
 
-**V50 — Reality Lab release**
+**V51 — Checkout Experience release**
 
 - Installable Progressive Web App
 - Offline application shell with service-worker caching
@@ -18,6 +18,8 @@ The interface stays professional. The workspace state has considerably more pers
 - Persistent workspace state through localStorage
 - Account, billing, operations, security, support, and workspace intelligence surfaces
 - Workspace export and local reset controls<br>- Live workspace telemetry, keyboard workflow helpers, notification state, and update detection<br>- Reality Lab with reversible visual modes, a focus bubble, absurd fortunes, and rubber-duck debugging tips
+- Three-stage animated demo checkout with plan selection, order summary, DEMO10 promo interaction, processing feedback, and a receipt screen
+- Explicit no-payment messaging; no real payment gateway, card collection, or backend processing
 - Keyboard-operable experiments with reduced-motion support
 - Versioned static assets and refreshed offline cache
 - Browser-only architecture with no backend, database, or payment processor
@@ -82,7 +84,7 @@ PREMIUM-/
 
 Enable **Settings → Pages → Deploy from branch → main → / (root)**.
 
-## V50 additions
+## V51 additions
 
 - Added a self-contained Reality Lab panel without replacing existing workspace routes
 - Added non-repeating absurd fortunes and debugging tips per browser session
@@ -102,7 +104,7 @@ Enable **Settings → Pages → Deploy from branch → main → / (root)**.
 ## Status
 
 **Production status:** Operational  
-**Release:** V50  
+**Release:** V51  
 **Backend:** None  
 **Database:** None  
 **Payment processor:** None  
