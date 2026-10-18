@@ -1,6 +1,6 @@
-const CACHE="premium-v49";
-const CORE=["./","./index.html","./style.css?v=49","./script.js?v=49","./manifest.webmanifest?v=49","./icon.svg?v=49"];
+const CACHE="premium-v50";
+const CORE=["./","./index.html","./style.css?v=50","./script.js?v=50","./upgrade.js?v=50","./manifest.webmanifest?v=50","./icon.svg?v=50"];
 self.addEventListener("install",event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(CORE)).then(()=>self.skipWaiting())));
 self.addEventListener("activate",event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
 self.addEventListener("message",event=>{if(event.data==="SKIP_WAITING")self.skipWaiting()});
-self.addEventListener("fetch",event=>{if(event.request.method!=="GET")return;const request=event.request;const url=new URL(request.url);if(url.origin!==self.location.origin)return;event.respondWith((async()=>{try{const response=await fetch(request,{cache:"no-store"});if(response.ok){const cache=await caches.open(CACHE);await cache.put(request,response.clone())}return response}catch(err){const cached=await caches.match(request);if(cached)return cached;if(request.mode==="navigate")return caches.match("./index.html");throw err}})())});
+self.addEventListener("fetch",event=>{if(event.request.method!=="GET")return;const request=event.request;const url=new URL(request.url);if(url.origin!==self.location.origin)return;event.respondWith((async()=>{try{const response=await fetch(request,{cache:"no-store"});if(response.ok){const cache=await caches.open(CACHE);await cache.put(request,response.clone())}return response}catch(err){const cached=await caches.match(request);if(cached)return cached;if(request.mode==="navigate")return caches.match("./index.html")||caches.match("./");throw err}})())});
