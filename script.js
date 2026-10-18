@@ -1,9 +1,17 @@
 /* Premium™ — unified client runtime
-   Static/PWA build: browser-local state only. No backend required.
+   Static/PWA build: in-memory state only. No browser storage, database, or backend.
 */
 (() => {
   "use strict";
 
+  // App data exists only in this page's memory and resets on refresh/close.
+  // This in-memory adapter deliberately avoids browser storage APIs.
+  const memory = new Map();
+  const volatileStorage = {
+    getItem(key) { return memory.has(key) ? memory.get(key) : null; },
+    setItem(key, value) { memory.set(key, String(value)); },
+    removeItem(key) { memory.delete(key); }
+  };
   const STORE = "premium-workspace-v1";
   const SESSION = "premium-session-v1";
   const PURCHASE = "premium-purchased-plan-v1";
@@ -32,12 +40,10 @@
 
   // Keep the demo plan only for this browsing session; closing the site resets it.
   function readPurchasedPlan() {
-    try { return normalizePlan(sessionStorage.getItem(PURCHASE) || "Free"); }
+    try { return normalizePlan(volatileStorage.getItem(PURCHASE) || "Free"); }
     catch { return "Free"; }
   }
 
-  // Remove the legacy persistent purchase flag from older versions.
-  try { localStorage.removeItem(PURCHASE); } catch {}
   let sessionPlan = readPurchasedPlan();
   let selectedPlan = sessionPlan;
   let sessionPurchaseValue = 0;
@@ -48,7 +54,7 @@
 
   function readState() {
     try {
-      const raw = JSON.parse(localStorage.getItem(STORE) || "{}");
+      const raw = JSON.parse(volatileStorage.getItem(STORE) || "{}");
       return {
         ...defaults,
         ...raw,
@@ -65,7 +71,7 @@
     try {
       // Never persist the selected plan. It must reset to Free on refresh.
       const { plan, premium, ...persisted } = nextState;
-      localStorage.setItem(STORE, JSON.stringify(persisted));
+      volatileStorage.setItem(STORE, JSON.stringify(persisted));
       return true;
     } catch {
       return false;
@@ -125,8 +131,8 @@
       headerUpgrade.setAttribute("aria-label", paid ? (sessionPlan + " is active") : "Get Premium");
     }
     // No ad network is connected. Plan state only suppresses on-page upgrade marketing.
-    const promosMuted = paid || localStorage.getItem(PROMO_PREF) === "1";
-    const quietMode = localStorage.getItem(QUIET_PREF) === "1";
+    const promosMuted = paid || volatileStorage.getItem(PROMO_PREF) === "1";
+    const quietMode = volatileStorage.getItem(QUIET_PREF) === "1";
     document.body.classList.toggle("has-paid-plan", paid);
     document.body.classList.toggle("promotions-muted", promosMuted);
     document.body.classList.toggle("quiet-workspace", quietMode);
@@ -188,7 +194,7 @@
     if (invoiceCount) invoiceCount.textContent = Math.max(1, Math.min(12, Math.ceil(state.events.length / 3)));
     if (identity) {
       try {
-        const session = JSON.parse(localStorage.getItem(SESSION) || "null");
+        const session = JSON.parse(volatileStorage.getItem(SESSION) || "null");
         identity.textContent = session?.name || session?.email || "Workspace Member";
       } catch {
         identity.textContent = "Workspace Member";
@@ -289,7 +295,7 @@
     }
     function checkoutView(){
       const price=priceFor(selectedPlan);
-      openModal("Secure checkout",'<div class="checkout-shell"><div class="checkout-progress"><span class="is-done"><i>✓</i> Choose</span><span class="is-current"><i>2</i> Checkout</span><span><i>3</i> Receipt</span></div><div class="checkout-secure"><span class="checkout-lock">♙</span><div><b>You’re in the secure zone</b><small>Simulated checkout. No real payment is taken.</small></div><span class="checkout-lock-label">DEMO</span></div><h3 class="checkout-title">One last tiny detail.</h3><p class="checkout-subtitle">Add a receipt email if you like, apply a demo code, then place your pretend order.</p><label class="checkout-label" for="checkoutEmail">Receipt email <span>optional</span></label><input class="checkout-input" id="checkoutEmail" type="email" placeholder="you@company.com" autocomplete="email"><label class="checkout-label">Payment method</label><div class="checkout-method"><span class="checkout-card-icon">▤</span><span><b>Demo card</b><small>Test ending in 4242 · no card details needed</small></span><span class="checkout-method-check">✓</span></div><label class="checkout-label" for="checkoutCoupon">Promo code <span>try DEMO10</span></label><div class="checkout-coupon"><input class="checkout-input" id="checkoutCoupon" placeholder="Enter a code"><button type="button" id="checkoutApplyCoupon">Apply</button></div><p id="checkoutCouponMessage" class="checkout-coupon-message" aria-live="polite">A little discount-shaped magic, perhaps?</p><div class="checkout-order"><div class="checkout-order-head"><b>Order summary</b><span>ORDER PREVIEW</span></div><div class="checkout-order-line"><span>'+escapeHtml(selectedPlan)+' subscription</span><b>'+money(price)+'</b></div><div class="checkout-order-line"><span>Taxes</span><b>₹0</b></div><div class="checkout-order-line checkout-discount" id="checkoutDiscountRow" style="display:none"><span>Demo discount (10%)</span><b>−'+money(price*.1)+'</b></div><div class="checkout-order-total"><span>Today’s demo total</span><b id="checkoutFinalTotal">'+money(price)+'</b></div><small>Monthly price is illustrative. No real charge.</small></div><button type="button" class="checkout-continue" id="checkoutPlaceOrder">Place demo order <span>↗</span></button><button type="button" class="checkout-back" id="checkoutBack">← Back to plans</button><p class="checkout-fineprint">🔒 Email stays in this browser session.</p></div>',"");
+      openModal("Secure checkout",'<div class="checkout-shell"><div class="checkout-progress"><span class="is-done"><i>✓</i> Choose</span><span class="is-current"><i>2</i> Checkout</span><span><i>3</i> Receipt</span></div><div class="checkout-secure"><span class="checkout-lock">♙</span><div><b>You’re in the secure zone</b><small>Simulated checkout. No real payment is taken.</small></div><span class="checkout-lock-label">DEMO</span></div><h3 class="checkout-title">One last tiny detail.</h3><p class="checkout-subtitle">Add a receipt email if you like, apply a demo code, then place your pretend order.</p><label class="checkout-label" for="checkoutEmail">Receipt email <span>optional</span></label><input class="checkout-input" id="checkoutEmail" type="email" placeholder="you@company.com" autocomplete="email"><label class="checkout-label">Payment method</label><div class="checkout-method"><span class="checkout-card-icon">▤</span><span><b>Demo card</b><small>Test ending in 4242 · no card details needed</small></span><span class="checkout-method-check">✓</span></div><label class="checkout-label" for="checkoutCoupon">Promo code <span>try DEMO10</span></label><div class="checkout-coupon"><input class="checkout-input" id="checkoutCoupon" placeholder="Enter a code"><button type="button" id="checkoutApplyCoupon">Apply</button></div><p id="checkoutCouponMessage" class="checkout-coupon-message" aria-live="polite">A little discount-shaped magic, perhaps?</p><div class="checkout-order"><div class="checkout-order-head"><b>Order summary</b><span>ORDER PREVIEW</span></div><div class="checkout-order-line"><span>'+escapeHtml(selectedPlan)+' subscription</span><b>'+money(price)+'</b></div><div class="checkout-order-line"><span>Taxes</span><b>₹0</b></div><div class="checkout-order-line checkout-discount" id="checkoutDiscountRow" style="display:none"><span>Demo discount (10%)</span><b>−'+money(price*.1)+'</b></div><div class="checkout-order-total"><span>Today’s demo total</span><b id="checkoutFinalTotal">'+money(price)+'</b></div><small>Monthly price is illustrative. No real charge.</small></div><button type="button" class="checkout-continue" id="checkoutPlaceOrder">Place demo order <span>↗</span></button><button type="button" class="checkout-back" id="checkoutBack">← Back to plans</button><p class="checkout-fineprint">🔒 Email stays in memory until you reload or close this page.</p></div>',"");
       $("#checkoutApplyCoupon").onclick=()=>{coupon=($("#checkoutCoupon").value||"").trim().toUpperCase()==="DEMO10";$("#checkoutCouponMessage").textContent=coupon?"✓ DEMO10 applied — 10% off your demo total.":"That code didn’t work. Try DEMO10.";$("#checkoutCouponMessage").classList.toggle("is-success",coupon);$("#checkoutDiscountRow").style.display=coupon?"flex":"none";$("#checkoutFinalTotal").textContent=money(price*(coupon?.9:1));};
       $("#checkoutBack").onclick=chooseView;
       $("#checkoutPlaceOrder").onclick=()=>{
@@ -304,8 +310,8 @@
     function finish(){
       const previous=sessionPlan, price=priceFor(selectedPlan);
       sessionPlan=selectedPlan;state=readState();state.plan=sessionPlan;state.premium=isPaidPlan(sessionPlan);
-      if(isPaidPlan(sessionPlan)) { try { sessionStorage.setItem(PURCHASE, sessionPlan); } catch {} }
-      else { try { sessionStorage.removeItem(PURCHASE); localStorage.removeItem(PURCHASE); } catch {} }
+      if(isPaidPlan(sessionPlan)) { try { volatileStorage.setItem(PURCHASE, sessionPlan); } catch {} }
+      else { try { volatileStorage.removeItem(PURCHASE); volatileStorage.removeItem(PURCHASE); } catch {} }
       if(isPaidPlan(sessionPlan)&&previous!==sessionPlan)sessionPurchaseValue+=price;
       writeState(state);record(sessionPlan==="Free"?"Selected Free plan":"Purchased "+sessionPlan+" plan (demo)");
       if(!isPaidPlan(sessionPlan)){closeModal();toast("Free plan is active.");return;}
@@ -329,16 +335,16 @@
 
   function signIn() {
     let session = null;
-    try { session = JSON.parse(localStorage.getItem(SESSION) || "null"); } catch {}
+    try { session = JSON.parse(volatileStorage.getItem(SESSION) || "null"); } catch {}
 
     if (session) {
       openModal(
         "Account session",
-        "Signed in as <b>" + escapeHtml(session.email) + "</b>.<br><br>Your browser-local workspace session is active.",
+        "Signed in as <b>" + escapeHtml(session.email) + "</b>.<br><br>Your in-memory workspace session is active.",
         '<div class="modal-actions"><button class="secondary" id="signOut">Sign out</button><button class="primary" id="openAccount">Open account</button></div>'
       );
       $("#signOut").onclick = () => {
-        localStorage.removeItem(SESSION);
+        volatileStorage.removeItem(SESSION);
         closeModal();
         record("Signed out");
         toast("Signed out.");
@@ -349,7 +355,7 @@
 
     openModal(
       "Sign in",
-      "Create a browser-local workspace session.",
+      "Create an in-memory workspace session.",
       '<label style="display:block;margin:10px 0 6px">Name</label>' +
       '<input id="loginName" placeholder="Your name" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:9px;font:inherit">' +
       '<label style="display:block;margin:10px 0 6px">Work email</label>' +
@@ -364,7 +370,7 @@
         toast("Enter a valid work email.");
         return;
       }
-      localStorage.setItem(SESSION, JSON.stringify({
+      volatileStorage.setItem(SESSION, JSON.stringify({
         name: name || email.split("@")[0],
         email,
         signedInAt: new Date().toISOString()
@@ -598,10 +604,10 @@
 
   function preferences() {
     const dark = document.body.dataset.theme === "dark";
-    const reduced = localStorage.getItem(REDUCED) === "1";
-    const quiet = localStorage.getItem(QUIET_PREF) === "1";
+    const reduced = volatileStorage.getItem(REDUCED) === "1";
+    const quiet = volatileStorage.getItem(QUIET_PREF) === "1";
     const paid = isPaidPlan(sessionPlan);
-    const promosMuted = paid || localStorage.getItem(PROMO_PREF) === "1";
+    const promosMuted = paid || volatileStorage.getItem(PROMO_PREF) === "1";
     openModal(
       "Experience controls",
       '<p class="pref-intro">Tune the workspace to your taste. Your choices stay in this browser.</p>' +
@@ -609,26 +615,26 @@
       '<div class="pref-row"><span><b>Reduced motion</b><small>Limit decorative animation</small></span><button class="secondary" id="prefMotion">' + (reduced ? "Disable" : "Enable") + " reduced motion</button></div>" +
       '<div class="pref-row"><span><b>Quiet workspace</b><small>Hide live ticker and announcement bar</small></span><button class="secondary" id="prefQuiet" aria-pressed="' + quiet + '">' + (quiet ? "Turn off" : "Turn on") + '</button></div>' +
       '<div class="pref-row"><span><b>Upgrade promotions</b><small>' + (paid ? "Disabled because a paid demo plan is active" : "Hide pricing and upgrade marketing") + '</small></span><button class="secondary" id="prefPromos" aria-pressed="' + promosMuted + '"' + (paid ? " disabled" : "") + '>' + (promosMuted ? "Hidden" : "Visible") + '</button></div>' +
-      '<p class="pref-footnote">' + (paid ? "Your " + escapeHtml(sessionPlan) + " demo plan stays promotion-free. Reset workspace clears its local purchase state." : "No ad network is connected. This controls on-page upgrade marketing only.") + '</p>' +
+      '<p class="pref-footnote">' + (paid ? "Your " + escapeHtml(sessionPlan) + " demo plan stays promotion-free. Reset workspace clears the in-memory purchase state." : "No ad network is connected. This controls on-page upgrade marketing only.") + '</p>' +
       '<div class="modal-actions"><button class="primary" id="prefDone">Done</button></div>'
     );
     $("#prefTheme").onclick = () => { toggleTheme(); preferences(); };
     $("#prefMotion").onclick = () => {
-      const next = localStorage.getItem(REDUCED) !== "1";
-      localStorage.setItem(REDUCED, next ? "1" : "0");
+      const next = volatileStorage.getItem(REDUCED) !== "1";
+      volatileStorage.setItem(REDUCED, next ? "1" : "0");
       document.documentElement.classList.toggle("reduced-motion", next);
       preferences();
     };
     $("#prefQuiet").onclick = () => {
-      const next = localStorage.getItem(QUIET_PREF) !== "1";
-      localStorage.setItem(QUIET_PREF, next ? "1" : "0");
+      const next = volatileStorage.getItem(QUIET_PREF) !== "1";
+      volatileStorage.setItem(QUIET_PREF, next ? "1" : "0");
       syncPlanUI();
       preferences();
     };
     $("#prefPromos").onclick = () => {
       if (paid) return;
-      const next = localStorage.getItem(PROMO_PREF) !== "1";
-      localStorage.setItem(PROMO_PREF, next ? "1" : "0");
+      const next = volatileStorage.getItem(PROMO_PREF) !== "1";
+      volatileStorage.setItem(PROMO_PREF, next ? "1" : "0");
       syncPlanUI();
       preferences();
     };
@@ -731,16 +737,16 @@
   function resetWorkspace() {
     openModal(
       "Reset workspace",
-      "Reset browser-local workspace data and return to the Free plan?",
+      "Reset in-memory workspace data and return to the Free plan?",
       '<div class="modal-actions"><button class="secondary" id="resetCancel">Cancel</button><button class="primary" id="resetConfirm">Reset workspace</button></div>'
     );
     $("#resetCancel").onclick = closeModal;
     $("#resetConfirm").onclick = () => {
-      localStorage.removeItem(STORE);
-      localStorage.removeItem(SESSION);
-      localStorage.removeItem(PURCHASE);
-      localStorage.removeItem(PROMO_PREF);
-      localStorage.removeItem(QUIET_PREF);
+      volatileStorage.removeItem(STORE);
+      volatileStorage.removeItem(SESSION);
+      volatileStorage.removeItem(PURCHASE);
+      volatileStorage.removeItem(PROMO_PREF);
+      volatileStorage.removeItem(QUIET_PREF);
       sessionPlan = "Free";
       selectedPlan = "Free";
       sessionPurchaseValue = 0;
@@ -1054,7 +1060,7 @@ function bindActions() {
 
   const savedTheme = readState().theme;
   applyTheme(savedTheme === "dark" ? "dark" : "light");
-  document.documentElement.classList.toggle("reduced-motion", localStorage.getItem(REDUCED) === "1");
+  document.documentElement.classList.toggle("reduced-motion", volatileStorage.getItem(REDUCED) === "1");
 
   renderState();
 
