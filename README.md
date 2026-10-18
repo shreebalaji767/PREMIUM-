@@ -7,7 +7,7 @@ The interface stays professional. The workspace state has considerably more pers
 
 ## Current release
 
-**V52 — Purchase-respecting experience**
+**V53 — Purchase-respecting experience**
 
 - Installable Progressive Web App
 - Offline application shell with service-worker caching
@@ -20,7 +20,8 @@ The interface stays professional. The workspace state has considerably more pers
 - Workspace export and local reset controls<br>- Live workspace telemetry, keyboard workflow helpers, notification state, and update detection<br>- Reality Lab with reversible visual modes, a focus bubble, absurd fortunes, and rubber-duck debugging tips
 - Three-stage animated demo checkout with plan selection, order summary, DEMO10 promo interaction, processing feedback, and a receipt screen
 - Purchase-respecting UI: after a paid demo checkout, Premium upsells and promotional sections stay hidden across reloads in that browser
-- No ad network or purchase-based ad targeting; the stored plan is used only to suppress upgrade promotions
+- Preference center with persistent quiet workspace mode and user-controlled upgrade-promotion visibility
+- Paid demo plans automatically suppress upgrade marketing across reloads; no ad network or purchase-based ad targeting
 - Explicit no-payment messaging; no real payment gateway, card collection, or backend processing
 - Keyboard-operable experiments with reduced-motion support
 - Versioned static assets and refreshed offline cache
@@ -86,9 +87,11 @@ PREMIUM-/
 
 Enable **Settings → Pages → Deploy from branch → main → / (root)**.
 
-## V52 additions
+## V53 additions
 
 - Persisted the locally selected demo plan in browser storage so the post-purchase experience survives refreshes
+- Added Experience Controls for appearance, reduced motion, quiet workspace, and upgrade-promotion visibility
+- Quiet workspace hides the announcement bar and live ticker; settings persist locally
 - Suppressed upgrade buttons, pricing promotions, Premium feature marketing, and the final sales CTA after a paid demo purchase
 - No ad network, ad profiling, or purchase-based ad targeting; Reset workspace clears the local purchase state
 
@@ -110,7 +113,7 @@ Enable **Settings → Pages → Deploy from branch → main → / (root)**.
 ## Status
 
 **Production status:** Operational  
-**Release:** V52  
+**Release:** V53  
 **Backend:** None  
 **Database:** None  
 **Payment processor:** None  
