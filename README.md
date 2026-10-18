@@ -3,11 +3,11 @@
 
 PREMIUM™ is a polished, static SaaS-style workspace experience with persistent browser state, account workflows, billing surfaces, operational controls, responsive layouts, accessibility improvements, and installable PWA support.
 
-The interface stays professional. The workspace state has considerably more personality.
+The interface stays professional. The workspace state has considerably more personality. Reality Lab adds playful, local-only experiments without changing the existing account, billing, security, support, or workspace routes.
 
 ## Current release
 
-**V12 — Workspace control layer**
+**V50 — Reality Lab release**
 
 - Installable Progressive Web App
 - Offline application shell with service-worker caching
@@ -17,7 +17,10 @@ The interface stays professional. The workspace state has considerably more pers
 - Reduced-motion preference
 - Persistent workspace state through localStorage
 - Account, billing, operations, security, support, and workspace intelligence surfaces
-- Workspace export and local reset controls<br>- Live workspace telemetry, keyboard workflow helpers, notification state, and update detection<br>- Browser-only architecture with no backend, database, or payment processor
+- Workspace export and local reset controls<br>- Live workspace telemetry, keyboard workflow helpers, notification state, and update detection<br>- Reality Lab with reversible visual modes, a focus bubble, absurd fortunes, and rubber-duck debugging tips
+- Keyboard-operable experiments with reduced-motion support
+- Versioned static assets and refreshed offline cache
+- Browser-only architecture with no backend, database, or payment processor
 
 ## Architecture
 
@@ -68,6 +71,7 @@ PREMIUM-/
 ├── index.html
 ├── style.css
 ├── script.js
+├── upgrade.js
 ├── manifest.webmanifest
 ├── sw.js
 ├── icon.svg
@@ -78,7 +82,15 @@ PREMIUM-/
 
 Enable **Settings → Pages → Deploy from branch → main → / (root)**.
 
-## V12 additions
+## V50 additions
+
+- Added a self-contained Reality Lab panel without replacing existing workspace routes
+- Added non-repeating absurd fortunes and debugging tips per browser session
+- Added reversible focus, glitch, and orbit modes with Escape-key exit and reduced-motion handling
+- Versioned HTML/CSS/JavaScript, manifest, and service-worker cache together
+- Updated offline cache fallback and install metadata
+
+## Earlier workspace additions
 
 - Command palette with keyboard shortcut `Ctrl/Cmd + K` and centralized command routing
 - Quick actions for billing, activity, security, account, preferences, appearance, installation, and upgrade
@@ -90,7 +102,7 @@ Enable **Settings → Pages → Deploy from branch → main → / (root)**.
 ## Status
 
 **Production status:** Operational  
-**Release:** V12  
+**Release:** V50  
 **Backend:** None  
 **Database:** None  
 **Payment processor:** None  
