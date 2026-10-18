@@ -7,6 +7,8 @@
   const STORE = "premium-workspace-v1";
   const SESSION = "premium-session-v1";
   const PURCHASE = "premium-purchased-plan-v1";
+  const PROMO_PREF = "premium-hide-promotions-v1";
+  const QUIET_PREF = "premium-quiet-mode-v1";
   const REDUCED = "premium-reduced-motion";
 
   const $ = (s, root = document) => root.querySelector(s);
@@ -120,12 +122,15 @@
       headerUpgrade.classList.toggle("is-active", paid);
       headerUpgrade.setAttribute("aria-label", paid ? (sessionPlan + " is active") : "Get Premium");
     }
-    // No ad network is connected. Use the locally stored plan only to suppress upsells,
-    // never to target or personalize advertisements.
+    // No ad network is connected. Plan state only suppresses on-page upgrade marketing.
+    const promosMuted = paid || localStorage.getItem(PROMO_PREF) === "1";
+    const quietMode = localStorage.getItem(QUIET_PREF) === "1";
     document.body.classList.toggle("has-paid-plan", paid);
-    $("[data-action=\"upgrade\"]").forEach(el => { el.hidden = paid; });
+    document.body.classList.toggle("promotions-muted", promosMuted);
+    document.body.classList.toggle("quiet-workspace", quietMode);
+    $("[data-action=\"upgrade\"]").forEach(el => { el.hidden = promosMuted; });
     const pricingNav = $('#mainNav a[href="#pricing"]');
-    if (pricingNav) pricingNav.hidden = paid;
+    if (pricingNav) pricingNav.hidden = promosMuted;
 
     $("[data-plan-status]").forEach(el => {
       const plan = el.dataset.plan || "";
@@ -592,10 +597,17 @@
   function preferences() {
     const dark = document.body.dataset.theme === "dark";
     const reduced = localStorage.getItem(REDUCED) === "1";
+    const quiet = localStorage.getItem(QUIET_PREF) === "1";
+    const paid = isPaidPlan(sessionPlan);
+    const promosMuted = paid || localStorage.getItem(PROMO_PREF) === "1";
     openModal(
-      "Preferences",
-      '<div class="pref-row"><span>Appearance</span><button class="secondary" id="prefTheme">' + (dark ? "Light" : "Dark") + " appearance</button></div>" +
-      '<div class="pref-row"><span>Reduced motion</span><button class="secondary" id="prefMotion">' + (reduced ? "Disable" : "Enable") + " reduced motion</button></div>" +
+      "Experience controls",
+      '<p class="pref-intro">Tune the workspace to your taste. Your choices stay in this browser.</p>' +
+      '<div class="pref-row"><span><b>Appearance</b><small>Choose a comfortable theme</small></span><button class="secondary" id="prefTheme">' + (dark ? "Light" : "Dark") + " appearance</button></div>" +
+      '<div class="pref-row"><span><b>Reduced motion</b><small>Limit decorative animation</small></span><button class="secondary" id="prefMotion">' + (reduced ? "Disable" : "Enable") + " reduced motion</button></div>" +
+      '<div class="pref-row"><span><b>Quiet workspace</b><small>Hide live ticker and announcement bar</small></span><button class="secondary" id="prefQuiet" aria-pressed="' + quiet + '">' + (quiet ? "Turn off" : "Turn on") + '</button></div>' +
+      '<div class="pref-row"><span><b>Upgrade promotions</b><small>' + (paid ? "Disabled because a paid demo plan is active" : "Hide pricing and upgrade marketing") + '</small></span><button class="secondary" id="prefPromos" aria-pressed="' + promosMuted + '"' + (paid ? " disabled" : "") + '>' + (promosMuted ? "Hidden" : "Visible") + '</button></div>' +
+      '<p class="pref-footnote">' + (paid ? "Your " + escapeHtml(sessionPlan) + " demo plan stays promotion-free. Reset workspace clears its local purchase state." : "No ad network is connected. This controls on-page upgrade marketing only.") + '</p>' +
       '<div class="modal-actions"><button class="primary" id="prefDone">Done</button></div>'
     );
     $("#prefTheme").onclick = () => { toggleTheme(); preferences(); };
@@ -603,6 +615,19 @@
       const next = localStorage.getItem(REDUCED) !== "1";
       localStorage.setItem(REDUCED, next ? "1" : "0");
       document.documentElement.classList.toggle("reduced-motion", next);
+      preferences();
+    };
+    $("#prefQuiet").onclick = () => {
+      const next = localStorage.getItem(QUIET_PREF) !== "1";
+      localStorage.setItem(QUIET_PREF, next ? "1" : "0");
+      syncPlanUI();
+      preferences();
+    };
+    $("#prefPromos").onclick = () => {
+      if (paid) return;
+      const next = localStorage.getItem(PROMO_PREF) !== "1";
+      localStorage.setItem(PROMO_PREF, next ? "1" : "0");
+      syncPlanUI();
       preferences();
     };
     $("#prefDone").onclick = closeModal;
@@ -712,6 +737,8 @@
       localStorage.removeItem(STORE);
       localStorage.removeItem(SESSION);
       localStorage.removeItem(PURCHASE);
+      localStorage.removeItem(PROMO_PREF);
+      localStorage.removeItem(QUIET_PREF);
       sessionPlan = "Free";
       selectedPlan = "Free";
       sessionPurchaseValue = 0;
@@ -996,7 +1023,7 @@ function bindActions() {
       window.location.reload();
     });
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./sw.js?v=52", { updateViaCache: "none" }).catch(() => {});
+      navigator.serviceWorker.register("./sw.js?v=53", { updateViaCache: "none" }).catch(() => {});
     });
   }
 
