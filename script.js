@@ -6,6 +6,7 @@
 
   const STORE = "premium-workspace-v1";
   const SESSION = "premium-session-v1";
+  const PURCHASE = "premium-purchased-plan-v1";
   const REDUCED = "premium-reduced-motion";
 
   const $ = (s, root = document) => root.querySelector(s);
@@ -23,14 +24,19 @@
     notificationsRead: false
   };
 
-  // Plan state is session-only. A fresh page load always starts on Free.
-  let sessionPlan = "Free";
-  let selectedPlan = "Free";
-  let sessionPurchaseValue = 0;
-
   function normalizePlan(plan) {
     return plan === "Premium" || plan === "Ultra Max Pro+" || plan === "Free" ? plan : "Free";
   }
+
+  // Remember the locally simulated plan so completed purchases suppress upsells after reload.
+  function readPurchasedPlan() {
+    try { return normalizePlan(localStorage.getItem(PURCHASE) || "Free"); }
+    catch { return "Free"; }
+  }
+
+  let sessionPlan = readPurchasedPlan();
+  let selectedPlan = sessionPlan;
+  let sessionPurchaseValue = 0;
 
   function isPaidPlan(plan) {
     return normalizePlan(plan) !== "Free";
@@ -69,13 +75,10 @@
 
   let state = readState();
 
-  // A new page load always begins on Free, regardless of the previous session.
-  sessionPlan = "Free";
-  selectedPlan = "Free";
-  state.plan = "Free";
-  state.premium = false;
-  // Purchase value belongs to the current page session only.
-  sessionPurchaseValue = 0;
+  // A locally completed demo purchase remains active across page reloads.
+  state.plan = sessionPlan;
+  state.premium = isPaidPlan(sessionPlan);
+  sessionPurchaseValue = isPaidPlan(sessionPlan) ? (sessionPlan === "Premium" ? 999 : 49999) : 0;
   state.accountValue = 0;
   state.visits = Number(state.visits || 0) + 1;
   writeState(state);
@@ -117,8 +120,14 @@
       headerUpgrade.classList.toggle("is-active", paid);
       headerUpgrade.setAttribute("aria-label", paid ? (sessionPlan + " is active") : "Get Premium");
     }
+    // No ad network is connected. Use the locally stored plan only to suppress upsells,
+    // never to target or personalize advertisements.
+    document.body.classList.toggle("has-paid-plan", paid);
+    $("[data-action=\"upgrade\"]").forEach(el => { el.hidden = paid; });
+    const pricingNav = $('#mainNav a[href="#pricing"]');
+    if (pricingNav) pricingNav.hidden = paid;
 
-    $$("[data-plan-status]").forEach(el => {
+    $("[data-plan-status]").forEach(el => {
       const plan = el.dataset.plan || "";
       const current = plan === sessionPlan;
       el.textContent = current ? "Current" : (plan === "Free" ? "Free" : plan);
@@ -288,11 +297,13 @@
     function finish(){
       const previous=sessionPlan, price=priceFor(selectedPlan);
       sessionPlan=selectedPlan;state=readState();state.plan=sessionPlan;state.premium=isPaidPlan(sessionPlan);
+      if(isPaidPlan(sessionPlan)) { try { localStorage.setItem(PURCHASE, sessionPlan); } catch {} }
+      else { try { localStorage.removeItem(PURCHASE); } catch {} }
       if(isPaidPlan(sessionPlan)&&previous!==sessionPlan)sessionPurchaseValue+=price;
       writeState(state);record(sessionPlan==="Free"?"Selected Free plan":"Purchased "+sessionPlan+" plan (demo)");
       if(!isPaidPlan(sessionPlan)){closeModal();toast("Free plan is active.");return;}
       const order="PR-"+Math.random().toString(36).slice(2,8).toUpperCase();
-      openModal("Order complete ✦",'<div class="checkout-shell checkout-receipt"><div class="checkout-progress"><span class="is-done"><i>✓</i> Choose</span><span class="is-done"><i>✓</i> Checkout</span><span class="is-current"><i>3</i> Receipt</span></div><div class="receipt-confetti" aria-hidden="true">✦ ✧ ✦</div><div class="receipt-stamp">DEMO ORDER · CONFIRMED</div><h3 class="checkout-title">A premium moment.</h3><p class="checkout-subtitle">Your imaginary order has landed. The upgrade is active for this page session.</p><div class="receipt-ticket"><div><small>ORDER REFERENCE</small><b>'+order+'</b></div><div><small>PLAN ACTIVATED</small><b>'+escapeHtml(sessionPlan)+'</b></div><div><small>DEMO TOTAL</small><b>'+money(price*(coupon?.9:1))+'</b></div>'+(receiptEmail?'<div><small>RECEIPT FOR</small><b>'+escapeHtml(receiptEmail)+'</b></div>':'')+'</div><div class="receipt-notice"><span>✓</span><p><b>No payment was processed.</b><br>This is a front-end demo with no payment gateway.</p></div><button type="button" class="checkout-continue" id="receiptDone">Enter your upgraded workspace <span>→</span></button></div>',"");
+      openModal("Order complete ✦",'<div class="checkout-shell checkout-receipt"><div class="checkout-progress"><span class="is-done"><i>✓</i> Choose</span><span class="is-done"><i>✓</i> Checkout</span><span class="is-current"><i>3</i> Receipt</span></div><div class="receipt-confetti" aria-hidden="true">✦ ✧ ✦</div><div class="receipt-stamp">DEMO ORDER · CONFIRMED</div><h3 class="checkout-title">A premium moment.</h3><p class="checkout-subtitle">Your demo plan is active on this browser, and upgrade promotions are now hidden.</p><div class="receipt-ticket"><div><small>ORDER REFERENCE</small><b>'+order+'</b></div><div><small>PLAN ACTIVATED</small><b>'+escapeHtml(sessionPlan)+'</b></div><div><small>DEMO TOTAL</small><b>'+money(price*(coupon?.9:1))+'</b></div>'+(receiptEmail?'<div><small>RECEIPT FOR</small><b>'+escapeHtml(receiptEmail)+'</b></div>':'')+'</div><div class="receipt-notice"><span>✓</span><p><b>No payment was processed.</b><br>This is a front-end demo with no payment gateway.</p></div><button type="button" class="checkout-continue" id="receiptDone">Enter your upgraded workspace <span>→</span></button></div>',"");
       $("#receiptDone").onclick=()=>{closeModal();toast(sessionPlan+" demo plan is active.");jump("top");};confetti();
     }
     chooseView();
@@ -700,6 +711,7 @@
     $("#resetConfirm").onclick = () => {
       localStorage.removeItem(STORE);
       localStorage.removeItem(SESSION);
+      localStorage.removeItem(PURCHASE);
       sessionPlan = "Free";
       selectedPlan = "Free";
       sessionPurchaseValue = 0;
@@ -984,7 +996,7 @@ function bindActions() {
       window.location.reload();
     });
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./sw.js?v=51", { updateViaCache: "none" }).catch(() => {});
+      navigator.serviceWorker.register("./sw.js?v=52", { updateViaCache: "none" }).catch(() => {});
     });
   }
 
