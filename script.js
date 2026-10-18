@@ -1027,7 +1027,7 @@ function bindActions() {
       window.location.reload();
     });
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./sw.js?v=47", { updateViaCache: "none" }).catch(() => {});
+      navigator.serviceWorker.register("./sw.js?v=50", { updateViaCache: "none" }).catch(() => {});
     });
   }
 
