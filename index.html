@@ -152,8 +152,7 @@
           "The metrics are up, the vibes are weird, and the potato has signed the contract."
         ];
         const $ = id => document.getElementById(id);
-        let previous = -1;
-        let count = 0;
+        let previous = -1, previousName = -1, previousRole = -1, count = 0;
         function chooseDifferent(max, last) {
           if (max < 2) return 0;
           let n;
@@ -163,8 +162,12 @@
         function rotateChaos() {
           const quoteIndex = chooseDifferent(quotes.length, previous);
           previous = quoteIndex;
-          const name = names[Math.floor(Math.random() * names.length)];
-          const role = roles[Math.floor(Math.random() * roles.length)];
+          const nameIndex = chooseDifferent(names.length, previousName);
+          previousName = nameIndex;
+          const roleIndex = chooseDifferent(roles.length, previousRole);
+          previousRole = roleIndex;
+          const name = names[nameIndex];
+          const role = roles[roleIndex];
           $("chaosQuote").textContent = "“" + quotes[quoteIndex] + "”";
           $("chaosName").textContent = name;
           $("chaosRole").textContent = role + " · Fictional persona";
