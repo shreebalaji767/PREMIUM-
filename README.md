@@ -7,7 +7,7 @@ The interface stays professional. The workspace state has considerably more pers
 
 ## Current release
 
-**V52 — Checkout Experience release**
+**V52 — Purchase-respecting experience**
 
 - Installable Progressive Web App
 - Offline application shell with service-worker caching
