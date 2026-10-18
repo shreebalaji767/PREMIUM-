@@ -30,12 +30,14 @@
     return plan === "Premium" || plan === "Ultra Max Pro+" || plan === "Free" ? plan : "Free";
   }
 
-  // Remember the locally simulated plan so completed purchases suppress upsells after reload.
+  // Keep the demo plan only for this browsing session; closing the site resets it.
   function readPurchasedPlan() {
-    try { return normalizePlan(localStorage.getItem(PURCHASE) || "Free"); }
+    try { return normalizePlan(sessionStorage.getItem(PURCHASE) || "Free"); }
     catch { return "Free"; }
   }
 
+  // Remove the legacy persistent purchase flag from older versions.
+  try { localStorage.removeItem(PURCHASE); } catch {}
   let sessionPlan = readPurchasedPlan();
   let selectedPlan = sessionPlan;
   let sessionPurchaseValue = 0;
@@ -77,7 +79,7 @@
 
   let state = readState();
 
-  // A locally completed demo purchase remains active across page reloads.
+  // A demo plan remains active on reloads in this tab, but not after the browsing session ends.
   state.plan = sessionPlan;
   state.premium = isPaidPlan(sessionPlan);
   sessionPurchaseValue = isPaidPlan(sessionPlan) ? (sessionPlan === "Premium" ? 999 : 49999) : 0;
@@ -302,8 +304,8 @@
     function finish(){
       const previous=sessionPlan, price=priceFor(selectedPlan);
       sessionPlan=selectedPlan;state=readState();state.plan=sessionPlan;state.premium=isPaidPlan(sessionPlan);
-      if(isPaidPlan(sessionPlan)) { try { localStorage.setItem(PURCHASE, sessionPlan); } catch {} }
-      else { try { localStorage.removeItem(PURCHASE); } catch {} }
+      if(isPaidPlan(sessionPlan)) { try { sessionStorage.setItem(PURCHASE, sessionPlan); } catch {} }
+      else { try { sessionStorage.removeItem(PURCHASE); localStorage.removeItem(PURCHASE); } catch {} }
       if(isPaidPlan(sessionPlan)&&previous!==sessionPlan)sessionPurchaseValue+=price;
       writeState(state);record(sessionPlan==="Free"?"Selected Free plan":"Purchased "+sessionPlan+" plan (demo)");
       if(!isPaidPlan(sessionPlan)){closeModal();toast("Free plan is active.");return;}
